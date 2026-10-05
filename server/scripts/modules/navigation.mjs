@@ -472,14 +472,18 @@ const AssignLastUpdate = (date) => {
 };
 
 const latLonReceived = async (data, haveDataCallback) => {
+	// limpar a data antes de carregar (antes era limpa depois, apagando a data acabada de escrever)
+	AssignLastUpdate(null);
 	await getWeather(data, haveDataCallback);
 	await getMarineForecast(data, haveDataCallback);
 	await getAirQualityForecast(data, haveDataCallback);
-	AssignLastUpdate(null);
 
 	// We can immediately start playing (auto play),
 	// as all data has been retrieved
 	setPlaying(true);
+
+	// garantir que o refresh automático arranca mesmo que algum ecrã fique preso em "loading"
+	if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR)?.checked) startAutoRefreshTimer();
 };
 
 const startAutoRefreshTimer = () => {

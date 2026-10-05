@@ -34,12 +34,14 @@ class CurrentWeather extends WeatherDisplay {
 	async drawCanvas() {
 		super.drawCanvas();
 
-		let condition = getConditionText(this.data.TextConditions);
+		const fullCondition = getConditionText(this.data.TextConditions);
+		let condition = fullCondition;
 		if (condition.length > 15) {
 			condition = shortConditions(condition);
 		}
 
-		const iconImage = getWeatherIconFromIconLink(condition, this.data.timeZone);
+		// o ícone usa o texto completo; o abreviado ("L Frz Rn") não corresponde a nenhum ícone
+		const iconImage = getWeatherIconFromIconLink(fullCondition, this.data.timeZone);
 		const pressureArrow = getPressureArrow(this.data);
 
 		const fill = {

@@ -155,8 +155,10 @@ const getWeatherRegionalIconFromIconLink = (text, isDay) => {
 		case 82:
 		case 'moderate-rain-showers':
 		case 'voilent-rain-showers':
+		case 'violent-rain-showers':
 		case 'moderate-rain-showers-night':
 		case 'voilent-rain-showers-night':
+		case 'violent-rain-showers-night':
 			return addPath('Rain-1992.gif');
 
 		case 85:
@@ -201,7 +203,9 @@ const getWeatherIconFromIconLink = (text, timeZone, extendedForecast) => {
 
 	const nightTime = isNightTime(timeZone);
 	let tidyText;
-	if (text.length > 3) {
+	// códigos numéricos passam tal como estão; texto é sempre normalizado
+	// (antes, textos com 3 letras como "Fog" não eram convertidos para minúsculas)
+	if (typeof text === 'string') {
 		tidyText = text.toLowerCase().replaceAll(' ', '-');
 	} else {
 		tidyText = text;
@@ -300,6 +304,7 @@ const getWeatherIconFromIconLink = (text, timeZone, extendedForecast) => {
 		case 82:
 		case 'moderate-rain-showers':
 		case 'voilent-rain-showers':
+		case 'violent-rain-showers':
 			return addPath('Rain.gif');
 
 		case 85:

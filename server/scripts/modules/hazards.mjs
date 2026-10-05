@@ -70,7 +70,9 @@ class Hazards extends WeatherDisplay {
 		const list = this.elem.querySelector('.hazard-lines');
 		list.innerHTML = '';
 
-		const lines = this.data.map((data) => {
+		// sem fonte de alertas neste fork: this.data fica undefined e o .map rebentava,
+		// deixando o ecrã em "loading" para sempre e impedindo o refresh automático
+		const lines = (this.data ?? []).map((data) => {
 			const fillValues = {};
 			// text
 			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${data.properties.description.replaceAll('\n\n', '<br/><br/>').replaceAll('\n', ' ')}`;

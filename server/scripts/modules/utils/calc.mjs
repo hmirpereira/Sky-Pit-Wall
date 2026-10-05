@@ -106,15 +106,18 @@ const wrap = (x, m) => ((x % m) + m) % m;
 
 function metarsToWeatherCode(metar) {
 	// This is a very basic implementation and may not cover all cases
+	// os padrões mais específicos têm de ser testados primeiro
+	// (antes, "RA" apanhava "+RA" e "TSRA" antes de chegarem aos seus testes)
+	if (metar.includes('TS')) return 95; // thunderstorm (com ou sem chuva)
+	if (metar.includes('SN')) return 73; // snow
+	if (metar.includes('+RA')) return 65; // heavy rain
 	if (metar.includes('-RA')) return 61; // light rain
 	if (metar.includes('RA')) return 63; // moderate rain
-	if (metar.includes('+RA')) return 65; // heavy rain
-	if (metar.includes('SN')) return 73;
-	if (metar.includes('TS')) return 95; // thunderstorm
-	if (metar.includes('TSRA')) return 99; // thunderstorm with rain
+	if (metar.includes('DZ')) return 53; // drizzle
+	if (metar.includes('FZFG')) return 48; // freezing fog
 	if (metar.includes('FG')) return 45; // fog
-	if (metar.includes('BR')) return 80;
-	if (metar.includes('HZ')) return 48;
+	// BR (neblina) e HZ (névoa seca) não têm código WMO de precipitação; tratados como nublado
+	if (metar.includes('BR') || metar.includes('HZ')) return 3;
 	return 0; // default to "clear" if no conditions found
 }
 

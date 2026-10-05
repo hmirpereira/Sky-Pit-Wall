@@ -83,7 +83,7 @@ const getMarinePoint = async (lat, lon) => {
 
 const getGeocoding = async (name) => {
 	try {
-		return await json(`https://geocoding-api.open-meteo.com/v1/search?name=${name}&count=10&language=en&format=json`);
+		return await json(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=10&language=en&format=json`);
 	} catch (error) {
 		console.log(`Unable to get locality with value ${name}`);
 		console.error(error);
@@ -108,16 +108,17 @@ const weatherConditions = [
 ];
 
 const getConditionText = (code) => {
-	const conditionIndex = weatherConditions.findIndex((condition) => condition.codes.includes(code));
+	const numericCode = Number(code);
+	const conditionIndex = weatherConditions.findIndex((condition) => condition.codes.includes(numericCode));
+
+	if (conditionIndex === -1) {
+		console.log('unable to determine weather condition from code: ', code);
+		return `unknown weather condition with code: ${code}`;
+	}
+
 	const weatherConditionObject = weatherConditions[conditionIndex];
-
-	const weatherTextIndex = weatherConditionObject.codes.findIndex((conditionCode) => conditionCode === code);
-	const weatherText = weatherConditionObject.text[weatherTextIndex];
-
-	if (conditionIndex !== -1) return weatherText;
-
-	console.log('unable to determine weather condition from code: ', code);
-	return `unknown weather condition with code: ${code}`;
+	const weatherTextIndex = weatherConditionObject.codes.findIndex((conditionCode) => conditionCode === numericCode);
+	return weatherConditionObject.text[weatherTextIndex];
 };
 
 /**
