@@ -82,7 +82,6 @@ const getWeather = async (latLon, haveDataCallback) => {
 
 	// Get locality data from open-meteo and local storage
 	const localityName = localStorage.getItem('latLonQuery');
-	const storedLatLon = localStorage.getItem('latLon');
 	let locality;
 
 	// We need to check if localityName is set in localStorage
@@ -110,32 +109,22 @@ const getWeather = async (latLon, haveDataCallback) => {
 		locality = await getGeocoding(localityName.split(',')[0]);
 	}
 
-	// we need to confirm that the stored latLon matches the latLon of the weather data we
-	// just retrieved. This ensures that we don't have a mismatch between the locality and the
-	// weather data
-	if (storedLatLon) {
-		const epsilon = 0.01; // ~1.1 km
-		// eslint-disable-next-line no-plusplus
-		for (let i = 0; i < locality.results.length; i++) {
-			const result = locality.results[i];
-			if (
-				Math.abs(result.latitude - latLon.lat) < epsilon
-				&& Math.abs(result.longitude - latLon.lon) < epsilon
-			) {
-				console.debug('getWeather: found a locality that matches the current latLon (rounded to 0.1)');
-				locality = {
-					results: [result],
-				};
-				break;
-			}
-		}
-	}
+	// pick the geocoding result closest to the coordinates we have weather for. Several places
+	// share names (Naples, Lincoln, Moreira...), and a lookup can also return nothing at all
+	// (e.g. a GPS query such as "41.2386, -8.6485"), so fall back to Open-Meteo's own timezone.
+	const results = locality?.results ?? [];
+	const distanceTo = (result) => Math.abs(result.latitude - latLon.lat) + Math.abs(result.longitude - latLon.lon);
+	const closest = results.reduce((best, result) => (!best || distanceTo(result) < distanceTo(best) ? result : best), null);
+	const fallbackName = (localStorage.getItem('latLonQuery') ?? '').split(',')[0].trim() || 'Unknown';
+	const place = closest ?? {
+		name: fallbackName, admin1: '', country: '', timezone: point.timezone,
+	};
 
 	// set the city and state
-	const city = locality.results[0].name;
-	const { country } = locality.results[0];
-	const state = locality.results[0].admin1;	// admin1 is usually the state / province
-	const { timezone } = locality.results[0];
+	const city = place.name;
+	const { country } = place;
+	const state = place.admin1 ?? '';	// admin1 is usually the state / province
+	const timezone = place.timezone ?? point.timezone;
 
 	// populate the weather parameters
 	weatherParameters.latitude = latLon.lat;

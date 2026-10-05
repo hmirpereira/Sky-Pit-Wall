@@ -437,15 +437,34 @@ const btnGetGpsClick = async () => {
 	const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
-	doRedirectToGeometry({ y: latitude, x: longitude }, (point) => {
-		const location = point.properties.relativeLocation.properties;
-		// Save the query
-		const query = `${location.city}, ${location.state}`;
-		localStorage.setItem('latLon', JSON.stringify({ lat: latitude, lon: longitude }));
-		localStorage.setItem('latLonQuery', query);
-		localStorage.setItem('latLonFromGPS', true);
-		txtAddress.value = `${location.city}, ${location.state}`;
-	});
+	// The old callback expected a NOAA (api.weather.gov) response and broke the GPS button.
+	// Instead, turn the coordinates into a place name first: the locality lookup works by name.
+	const placeName = await reverseGeocode(latitude, longitude);
+	if (placeName) txtAddress.value = placeName;
+
+	// doRedirectToGeometry stores the text box value as the query and the coordinates as latLon
+	doRedirectToGeometry({ y: latitude, x: longitude });
+	localStorage.setItem('latLonFromGPS', true);
+};
+
+// "Maia, Porto, Portugal" for a pair of coordinates (ArcGIS, the same service as the search box)
+const reverseGeocode = async (latitude, longitude) => {
+	try {
+		const result = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
+			data: {
+				location: `${longitude},${latitude}`,
+				langCode: 'en',
+				f: 'json',
+			},
+		});
+		const address = result?.address;
+		if (!address) return null;
+		// municipality first: parish or district names are often shared by many places
+		return [address.Subregion || address.City, address.Region, address.CntryName].filter(Boolean).join(', ');
+	} catch (error) {
+		console.error('Unable to reverse geocode GPS position', error);
+		return null;
+	}
 };
 
 // check for change in full screen triggered by browser and run local functions
