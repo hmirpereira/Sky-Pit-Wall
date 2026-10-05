@@ -412,8 +412,10 @@ const postMessage = (type, myMessage = {}) => {
 	navMessage({ type, message: myMessage });
 };
 
-const getPosition = async () => new Promise((resolve) => {
-	navigator.geolocation.getCurrentPosition(resolve);
+// rejects when the browser cannot get a position (permission denied, location services off,
+// timeout); before, a failure left the GPS button waiting forever
+const getPosition = async () => new Promise((resolve, reject) => {
+	navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 15000, maximumAge: 10 * 60 * 1000 });
 });
 
 const btnGetGpsClick = async () => {
@@ -430,11 +432,23 @@ const btnGetGpsClick = async () => {
 	// set gps active
 	btn.classList.add('active');
 
+	const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
+
 	// get position
-	const position = await getPosition();
+	let position;
+	try {
+		position = await getPosition();
+	} catch (error) {
+		console.error('Unable to get GPS position', error);
+		btn.classList.remove('active');
+		localStorage.removeItem('latLonFromGPS');
+		txtAddress.value = '';
+		txtAddress.placeholder = 'Location unavailable, type your city';
+		txtAddress.focus();
+		return;
+	}
 	const { latitude, longitude } = position.coords;
 
-	const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
 	// The old callback expected a NOAA (api.weather.gov) response and broke the GPS button.

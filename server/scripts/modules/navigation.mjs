@@ -355,6 +355,12 @@ const setPlaying = (newValue) => {
 
 // handle all navigation buttons
 const handleNavButton = (button) => {
+	// before a location is loaded there is nothing to navigate: showing the menu (progress
+	// screen) here used to draw it below the start screen. Point the user to the search box.
+	if (weatherParameters.latitude === undefined) {
+		document.querySelector('#txtAddress')?.focus();
+		return;
+	}
 	switch (button) {
 		case 'play':
 			setPlaying(true);
