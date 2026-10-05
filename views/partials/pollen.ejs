@@ -1,0 +1,15 @@
+<%- include('header.ejs', {titleDual:{ top: 'Pollen' , bottom: 'Forecast Today' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll pollen">
+		<div class="column-headers">
+			<div class="level">LEVEL</div>
+			<div class="count">COUNT</div>
+		</div>
+		<div class="pollen-lines">
+			<div class="pollen-row template">
+				<div class="name"></div>
+				<div class="level"></div>
+				<div class="count"></div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

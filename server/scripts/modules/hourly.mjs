@@ -56,7 +56,10 @@ class Hourly extends WeatherDisplay {
 
 			// hour
 			const hour = startingHour.plus({ hours: index });
-			const formattedHour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
+			// follows the "Hours Format" setting ("Mon 18:00" or "Mon, 6 PM")
+			const formattedHour = ConversionHelpers.getHoursFormat() === '12-hour'
+				? hour.toLocaleString({ weekday: 'short', hour: 'numeric', hourCycle: 'h12' })
+				: hour.startOf('hour').toFormat('ccc HH:mm');
 			fillValues.hour = formattedHour;
 
 			// temperatures, convert to strings with no decimal

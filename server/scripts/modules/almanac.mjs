@@ -1,6 +1,7 @@
 // display sun and moon data
 import { loadImg, preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
+import ConversionHelpers from './utils/conversionHelpers.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -123,10 +124,10 @@ class Almanac extends WeatherDisplay {
 		// sun and moon data
 		this.elem.querySelector('.day-1').innerHTML = Today.toLocaleString({ weekday: 'long' });
 		this.elem.querySelector('.day-2').innerHTML = Tomorrow.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.rise-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.rise-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.rise-1').innerHTML = ConversionHelpers.formatTime(DateTime.fromJSDate(info.sun[0].sunrise));
+		this.elem.querySelector('.rise-2').innerHTML = ConversionHelpers.formatTime(DateTime.fromJSDate(info.sun[1].sunrise));
+		this.elem.querySelector('.set-1').innerHTML = ConversionHelpers.formatTime(DateTime.fromJSDate(info.sun[0].sunset));
+		this.elem.querySelector('.set-2').innerHTML = ConversionHelpers.formatTime(DateTime.fromJSDate(info.sun[1].sunset));
 
 		const days = info.moon.map((MoonPhase) => {
 			const fill = {};

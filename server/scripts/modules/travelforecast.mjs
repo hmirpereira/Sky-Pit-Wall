@@ -5,6 +5,20 @@ import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { getConditionText } from './utils/weather.mjs';
+import ConversionHelpers from './utils/conversionHelpers.mjs';
+
+// cities shown on the travel forecast (Open-Meteo, any location worldwide)
+const TRAVEL_CITIES = [
+	{ Name: 'Frankfurt', lat: 50.1109, lon: 8.6821 },
+	{ Name: 'Munich', lat: 48.1351, lon: 11.5820 },
+	{ Name: 'Zurich', lat: 47.3769, lon: 8.5417 },
+	{ Name: 'Geneva', lat: 46.2044, lon: 6.1432 },
+	{ Name: 'Vienna', lat: 48.2082, lon: 16.3738 },
+];
+
+// after this local hour the forecast shown is for tomorrow
+const SWITCH_TO_TOMORROW_HOUR = 18;
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -17,7 +31,7 @@ class TravelForecast extends WeatherDisplay {
 		// set up the timing
 		this.timing.baseDelay = 20;
 		// page sizes are 4 cities, calculate the number of pages necessary plus overflow
-		const pagesFloat = TravelCities.length / 4;
+		const pagesFloat = TRAVEL_CITIES.length / 4;
 		const pages = Math.floor(pagesFloat) - 2; // first page is already displayed, last page doesn't happen
 		const extra = pages % 1;
 		const timingStep = 75 * 4;
@@ -33,34 +47,36 @@ class TravelForecast extends WeatherDisplay {
 	async getData() {
 		// super checks for enabled
 		if (!super.getData()) return;
-		const forecastPromises = TravelCities.map(async (city) => {
-			try {
-				// get point then forecast
-				if (!city.point) throw new Error('No pre-loaded point');
-				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
-				// determine today or tomorrow (shift periods by 1 if tomorrow)
-				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
-				// return a pared-down forecast
-				return {
-					today: todayShift === 0,
-					high: forecast.properties.periods[todayShift].temperature,
-					low: forecast.properties.periods[todayShift + 1].temperature,
-					name: city.Name,
-					icon: getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
-				};
-			} catch (error) {
-				console.error(`GetTravelWeather for ${city.Name} failed`);
-				console.error(error.status, error.responseJSON);
-				return { name: city.Name, error: true };
-			}
-		});
 
-		// wait for all forecasts
-		const forecasts = await Promise.all(forecastPromises);
-		this.data = forecasts;
+		const today = DateTime.local().hour < SWITCH_TO_TOMORROW_HOUR;
+		const dayIndex = today ? 0 : 1;
+
+		try {
+			// one request for all cities
+			const lats = TRAVEL_CITIES.map((city) => city.lat).join(',');
+			const lons = TRAVEL_CITIES.map((city) => city.lon).join(',');
+			const response = await json(`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=2`);
+			const results = Array.isArray(response) ? response : [response];
+
+			this.data = TRAVEL_CITIES.map((city, index) => {
+				const daily = results[index]?.daily;
+				if (!daily) return { name: city.Name, error: true };
+				const condition = getConditionText(Number(daily.weather_code[dayIndex]));
+				return {
+					today,
+					high: ConversionHelpers.convertTemperatureUnits(daily.temperature_2m_max[dayIndex]),
+					low: ConversionHelpers.convertTemperatureUnits(daily.temperature_2m_min[dayIndex]),
+					name: city.Name,
+					icon: getWeatherRegionalIconFromIconLink(condition, 1),
+				};
+			});
+		} catch (error) {
+			console.error('GetTravelWeather failed', error);
+			this.data = TRAVEL_CITIES.map((city) => ({ name: city.Name, error: true }));
+		}
 
 		// test for some data available in at least one forecast
-		const hasData = this.data.some((forecast) => forecast.high);
+		const hasData = this.data.some((forecast) => !forecast.error);
 		if (!hasData) {
 			this.setStatus(STATUS.noData);
 			return;

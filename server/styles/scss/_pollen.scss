@@ -1,0 +1,88 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.pollen {
+	&.main {
+		overflow: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			height: 20px;
+			position: relative;
+
+			div {
+				position: absolute;
+				top: -14px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+			}
+
+			.level {
+				left: 300px;
+			}
+
+			.count {
+				left: 480px;
+			}
+		}
+
+		.pollen-lines {
+			height: 290px;
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.pollen-row {
+				position: relative;
+				height: 47px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: c.$title-color;
+				@include u.text-shadow();
+
+				>div {
+					position: absolute;
+					top: 8px;
+					white-space: pre;
+				}
+
+				.name {
+					left: 80px;
+				}
+
+				.level {
+					left: 300px;
+					color: white;
+
+					&.none,
+					&.low {
+						color: #7CFC00;
+					}
+
+					&.moderate {
+						color: yellow;
+					}
+
+					&.high {
+						color: orange;
+					}
+
+					&.very-high {
+						color: #ff4040;
+					}
+				}
+
+				.count {
+					left: 470px;
+					width: 100px;
+					text-align: right;
+					color: white;
+				}
+			}
+		}
+	}
+}

@@ -37,6 +37,17 @@ export default class ConversionHelpers {
 		return hoursFormat;
 	}
 
+	// Intl/Luxon hour cycle matching the "Hours Format" setting
+	static getHourCycle() {
+		return this.getHoursFormat() === '12-hour' ? 'h12' : 'h23';
+	}
+
+	// time of day (e.g. "18:05" or "6:05 pm") following the "Hours Format" setting
+	static formatTime(dateTime) {
+		if (this.getHoursFormat() === '12-hour') return dateTime.toFormat('h:mm a').toLowerCase();
+		return dateTime.toFormat('HH:mm');
+	}
+
 	static calculateCeilingInKM(temperature, dewPoint) {
 		if (temperature === null || dewPoint === null) {
 			return null;

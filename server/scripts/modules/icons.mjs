@@ -203,8 +203,8 @@ const getWeatherIconFromIconLink = (text, timeZone, extendedForecast) => {
 
 	const nightTime = isNightTime(timeZone);
 	let tidyText;
-	// códigos numéricos passam tal como estão; texto é sempre normalizado
-	// (antes, textos com 3 letras como "Fog" não eram convertidos para minúsculas)
+	// numeric codes pass through; text is always normalised
+	// (previously 3-letter texts such as "Fog" were not lower-cased)
 	if (typeof text === 'string') {
 		tidyText = text.toLowerCase().replaceAll(' ', '-');
 	} else {

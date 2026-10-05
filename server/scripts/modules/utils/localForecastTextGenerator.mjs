@@ -54,7 +54,10 @@ function generateLocalForecast(dateStamp, hourlyData) {
 		if (maxPrecip >= 30) {
 			const peakHour = periodData.find((entry) => entry.precipitation_probability === maxPrecip)?.time;
 			const hour = new Date(peakHour).getHours();
-			const precipTime = `AFTER ${hour % 12 || 12} ${hour < 12 ? 'AM' : 'PM'}`;
+			// follows the "Hours Format" setting ("AFTER 15:00" or "AFTER 3 PM")
+			const precipTime = ConversionHelpers.getHoursFormat() === '12-hour'
+				? `AFTER ${hour % 12 || 12} ${hour < 12 ? 'AM' : 'PM'}`
+				: `AFTER ${String(hour).padStart(2, '0')}:00`;
 			precipChance = `${phraseVariations['CHANCE OF PRECIPITATION'][Math.floor(Math.random() * phraseVariations['CHANCE OF PRECIPITATION'].length)]} ${precipTime}. CHANCE IS ${maxPrecip}%.`;
 		}
 

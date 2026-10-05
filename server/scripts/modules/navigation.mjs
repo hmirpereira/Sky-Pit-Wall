@@ -11,6 +11,7 @@ import NearbyCities from './utils/nearby-cities.mjs';
 import ExperimentalFeatures from './utils/experimental.mjs';
 
 import { parseQueryString } from './share.mjs';
+import ConversionHelpers from './utils/conversionHelpers.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -463,7 +464,7 @@ const autoRefreshChange = (e) => {
 const AssignLastUpdate = (date) => {
 	if (date) {
 		document.querySelector('#spanLastRefresh').innerHTML = date.toLocaleString('en-US', {
-			weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
+			weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short', hourCycle: ConversionHelpers.getHourCycle(),
 		});
 		if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked) startAutoRefreshTimer();
 	} else {
@@ -472,18 +473,24 @@ const AssignLastUpdate = (date) => {
 };
 
 const latLonReceived = async (data, haveDataCallback) => {
-	// limpar a data antes de carregar (antes era limpa depois, apagando a data acabada de escrever)
+	// clear the timestamp before loading (it used to be cleared afterwards, wiping the new value)
 	AssignLastUpdate(null);
-	await getWeather(data, haveDataCallback);
-	await getMarineForecast(data, haveDataCallback);
-	await getAirQualityForecast(data, haveDataCallback);
+	try {
+		await getWeather(data, haveDataCallback);
+		await getMarineForecast(data, haveDataCallback);
+		await getAirQualityForecast(data, haveDataCallback);
 
-	// We can immediately start playing (auto play),
-	// as all data has been retrieved
-	setPlaying(true);
-
-	// garantir que o refresh automático arranca mesmo que algum ecrã fique preso em "loading"
-	if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR)?.checked) startAutoRefreshTimer();
+		// We can immediately start playing (auto play),
+		// as all data has been retrieved
+		setPlaying(true);
+	} catch (error) {
+		// a network or API failure must not stop the auto refresh for good
+		console.error('latLonReceived: failed to get data, retrying on next refresh', error);
+	} finally {
+		// make sure the auto refresh starts even if a display is stuck in "loading"
+		// or the data load failed
+		if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR)?.checked) startAutoRefreshTimer();
+	}
 };
 
 const startAutoRefreshTimer = () => {

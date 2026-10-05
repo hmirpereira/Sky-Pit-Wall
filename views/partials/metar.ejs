@@ -1,0 +1,11 @@
+<%- include('header.ejs', {titleDual:{ top: 'Porto Airport' , bottom: 'LPPR METAR' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll has-box metar">
+		<div class="metar-lines">
+			<div class="metar-row template">
+				<div class="label"></div>
+				<div class="value"></div>
+			</div>
+		</div>
+		<div class="metar-raw"></div>
+	</div>
+	<%- include('scroll.ejs') %>

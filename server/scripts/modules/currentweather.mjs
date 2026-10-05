@@ -40,7 +40,7 @@ class CurrentWeather extends WeatherDisplay {
 			condition = shortConditions(condition);
 		}
 
-		// o ícone usa o texto completo; o abreviado ("L Frz Rn") não corresponde a nenhum ícone
+		// use the full text for the icon; the shortened one ("L Frz Rn") matches no icon
 		const iconImage = getWeatherIconFromIconLink(fullCondition, this.data.timeZone);
 		const pressureArrow = getPressureArrow(this.data);
 

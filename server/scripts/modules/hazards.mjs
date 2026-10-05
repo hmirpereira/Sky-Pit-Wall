@@ -1,19 +1,39 @@
-// hourly forecast list
+// weather warnings from IPMA (Portuguese weather service)
 
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 
-const hazardLevels = {
-	Extreme: 10,
-	Severe: 5,
+// NOTE: by the owner's choice, this screen is shown in Portuguese, the language of the IPMA
+// warning texts (the IPMA open data API has no English version of the descriptions).
+
+// IPMA warning area shown on this screen (PTO = Porto district)
+const AREA = { id: 'PTO', name: 'Distrito do Porto' };
+const IPMA_WARNINGS_URL = 'https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json';
+
+const LEVELS = { yellow: 1, orange: 2, red: 3 };
+const LEVEL_NAMES = { yellow: 'AMARELO', orange: 'LARANJA', red: 'VERMELHO' };
+
+const DAYS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const MONTHS = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+
+const stripAccents = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+// IPMA times are Portuguese local time without an offset ("2026-10-06T09:00:00")
+const formatIpmaTime = (value) => {
+	const [date, time] = value.split('T');
+	const [y, m, d] = date.split('-').map(Number);
+	const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+	return `${DAYS[weekday]} ${d} ${MONTHS[m - 1]} ${time.slice(0, 5)}`;
 };
 
-const hazardModifiers = {
-	'Hurricane Warning': 2,
-	'Tornado Warning': 3,
-	'Severe Thunderstorm Warning': 1,
+// current time in Portugal, in the same format as IPMA, so strings can be compared
+const nowInPortugal = () => {
+	const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+		timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+	}).formatToParts(new Date()).map((p) => [p.type, p.value]));
+	return `${parts.year}-${parts.month}-${parts.day}T${parts.hour === '24' ? '00' : parts.hour}:${parts.minute}:${parts.second}`;
 };
 
 class Hazards extends WeatherDisplay {
@@ -33,28 +53,19 @@ class Hazards extends WeatherDisplay {
 		const alert = this.checkbox.querySelector('.alert');
 		alert.classList.remove('show');
 
-		// try {
-		// 	// get the forecast
-		// 	const url = new URL('https://api.weather.gov/alerts/active');
-		// 	url.searchParams.append('point', `${this.weatherParameters.latitude},${this.weatherParameters.longitude}`);
-		// 	url.searchParams.append('limit', 5);
-		// 	const alerts = await json(url, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
-		// 	const unsortedAlerts = alerts.features ?? [];
-		// 	const hasImmediate = unsortedAlerts.reduce((acc, hazard) => acc || hazard.properties.urgency === 'Immediate', false);
-		// 	const sortedAlerts = unsortedAlerts.sort((a, b) => (calcSeverity(b.properties.severity, b.properties.event)) - (calcSeverity(a.properties.severity, a.properties.event)));
-		// 	const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown' && (!hasImmediate || (hazard.properties.urgency === 'Immediate')));
-		// 	this.data = filteredAlerts;
+		try {
+			const warnings = await json(IPMA_WARNINGS_URL);
+			const now = nowInPortugal();
+			this.data = warnings
+				.filter((w) => w.idAreaAviso === AREA.id && LEVELS[w.awarenessLevelID] && w.endTime > now)
+				.sort((a, b) => (LEVELS[b.awarenessLevelID] - LEVELS[a.awarenessLevelID]) || a.startTime.localeCompare(b.startTime));
 
-		// 	// show alert indicator
-		// 	if (this.data.length > 0) alert.classList.add('show');
-		// } catch (error) {
-		// 	console.error('Get hourly forecast failed');
-		// 	console.error(error.status, error.responseJSON);
-		// 	if (this.isEnabled) this.setStatus(STATUS.failed);
-		// 	// return undefined to other subscribers
-		// 	this.getDataCallback(undefined);
-		// 	return;
-		// }
+			// show alert indicator
+			if (this.data.length > 0) alert.classList.add('show');
+		} catch (error) {
+			console.error('Hazards: unable to get IPMA warnings', error);
+			this.data = [];
+		}
 
 		this.getDataCallback();
 
@@ -70,17 +81,27 @@ class Hazards extends WeatherDisplay {
 		const list = this.elem.querySelector('.hazard-lines');
 		list.innerHTML = '';
 
-		// sem fonte de alertas neste fork: this.data fica undefined e o .map rebentava,
-		// deixando o ecrã em "loading" para sempre e impedindo o refresh automático
-		const lines = (this.data ?? []).map((data) => {
-			const fillValues = {};
-			// text
-			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${data.properties.description.replaceAll('\n\n', '<br/><br/>').replaceAll('\n', ' ')}`;
+		const now = nowInPortugal();
+		const lines = (this.data ?? []).map((warning) => {
+			const level = LEVEL_NAMES[warning.awarenessLevelID];
+			const period = warning.startTime > now
+				? `DE ${formatIpmaTime(warning.startTime)}<br/>ATÉ ${formatIpmaTime(warning.endTime)}`
+				: `ATÉ ${formatIpmaTime(warning.endTime)}`;
+			const description = warning.text ? `<br/><br/>${warning.text}` : '';
 
-			return this.fillTemplate('hazard', fillValues);
+			const line = this.fillTemplate('hazard', {
+				// the Star4000 fonts have no usable accented capitals, so accents are removed (ATÉ -> ATE)
+				'hazard-text': stripAccents(`AVISO ${level}<br/>${warning.awarenessTypeName}<br/>${AREA.name}<br/>${period}${description}`),
+			});
+			line.classList.add(`level-${warning.awarenessLevelID}`);
+			return line;
 		});
 
 		list.append(...lines);
+
+		// background colour follows the most severe warning
+		list.className = 'hazard-lines';
+		if (this.data?.length) list.classList.add(`level-${this.data[0].awarenessLevelID}`);
 
 		// no alerts, skip this display by setting timing to zero
 		if (lines.length === 0) {
@@ -156,13 +177,6 @@ class Hazards extends WeatherDisplay {
 		return superValue;
 	}
 }
-
-const calcSeverity = (severity, event) => {
-	// base severity plus some modifiers for specific types of warnings
-	const baseSeverity = hazardLevels[severity] ?? 0;
-	const modifiedSeverity = hazardModifiers[event] ?? 0;
-	return baseSeverity + modifiedSeverity;
-};
 
 // register display
 registerDisplay(new Hazards(0, 'hazards', false));
