@@ -13,9 +13,10 @@ const CLOUD_COVER = {
 	OVC: 'Overcast',
 };
 
+// kept as the standard abbreviations: the full names do not fit on the screen
 const CLOUD_TYPE = {
-	CB: 'cumulonimbus',
-	TCU: 'towering cumulus',
+	CB: 'CB',
+	TCU: 'TCU',
 };
 
 const DESCRIPTORS = {

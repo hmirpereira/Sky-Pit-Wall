@@ -7,6 +7,10 @@
 
 		.metar-lines {
 			margin-top: 8px;
+			// rows are spread evenly over the height set in metar.mjs
+			display: flex;
+			flex-direction: column;
+			justify-content: space-evenly;
 			font-family: 'Star4000 Large';
 			font-size: 15pt;
 			font-weight: bold;
@@ -14,6 +18,7 @@
 
 			.metar-row {
 				display: flex;
+				flex: none;
 				height: 23px;
 				white-space: nowrap;
 
@@ -28,11 +33,6 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 				}
-			}
-
-			&.compact .metar-row {
-				font-size: 13pt;
-				height: 19px;
 			}
 		}
 
