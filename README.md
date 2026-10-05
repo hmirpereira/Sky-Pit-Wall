@@ -11,6 +11,31 @@ This project is a fork of [`ws4kp`](https://github.com/netbymatt/ws4kp) by [@net
 
 A live version of this project is available at https://mwood77.github.io/ws4kp-international
 
+## About this fork (hmirpereira)
+
+Personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international), running on a kitchen TV from a Raspberry Pi in kiosk mode. Live version: https://hmirpereira.github.io/ws4kp-international
+
+### Changes from upstream
+
+**New and reworked screens**
+- **Airport METAR**: LPPR (Porto) METAR decoded into plain English, with the raw report underneath. Busy reports are split into pages. Source: [metar.vatsim.net](https://metar.vatsim.net) (CORS-enabled, no key).
+- **Hazards**: IPMA (Portuguese weather service) warnings for the Porto district, shown in Portuguese by choice. Only yellow, orange and red warnings are shown; the screen is skipped when there are none.
+- **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
+- **Travel Forecast**: Open-Meteo forecast for Frankfurt, Munich, Zurich, Geneva and Vienna (edit `TRAVEL_CITIES` in `travelforecast.mjs`).
+
+**Fixes**
+- Auto refresh never started when a display stayed in "loading" (e.g. Hazards) or after a failed data request.
+- The Hazards screen was never hidden, which stalled the rotation as soon as there was a warning.
+- "Last Update" always showed "(none)".
+- Missing weather icons: fog, freezing drizzle and rain, hail and violent rain showers.
+- Times now follow the "Hours Format" setting everywhere (Hourly Forecast, Almanac, Radar, Local Forecast text).
+- METAR to weather code conversion for personal weather stations (test order and codes).
+- Webamp pinned to a fixed version instead of `@next`; image preloads resolve relative to the page.
+
+### Updating the live site
+
+Edit the sources, run `npm run build:css` and `npm run build`, and commit the `docs/` folder together with the sources. GitHub Pages serves `docs/` from `main`.
+
 ## About
 
 This project aims to bring back the feel of the 90's with a weather forecast that has the look and feel of The Weather Channel at that time but available in a modern way. 
