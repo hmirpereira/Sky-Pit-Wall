@@ -1,0 +1,18 @@
+<%- include('header.ejs', {titleDual:{ top: 'Porto Departures' , bottom: 'Lufthansa Group' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll departures">
+		<div class="column-headers">
+			<div class="flight">FLIGHT</div>
+			<div class="time">TIME</div>
+			<div class="status">STATUS</div>
+		</div>
+		<div class="departures-lines">
+			<div class="departures-row template">
+				<img class="tail" alt="" />
+				<div class="flight"></div>
+				<div class="time"></div>
+				<div class="status"></div>
+			</div>
+		</div>
+		<div class="departures-footer"></div>
+	</div>
+	<%- include('scroll.ejs') %>

@@ -1,0 +1,110 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.departures {
+	&.main {
+		overflow: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			// taller than on other screens so FLIGHT clears the logo
+			height: 30px;
+			position: relative;
+
+			div {
+				position: absolute;
+				top: -4px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+			}
+
+			.flight {
+				left: 60px;
+			}
+
+			.time {
+				left: 255px;
+			}
+
+			.status {
+				left: 400px;
+			}
+		}
+
+		.departures-lines {
+			height: 280px;
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.departures-row {
+				position: relative;
+				height: 40px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: white;
+				@include u.text-shadow();
+
+				>div {
+					position: absolute;
+					top: 4px;
+					white-space: pre;
+				}
+
+				// airline tail icon (square image, shown 36 x 36)
+				.tail {
+					position: absolute;
+					left: 14px;
+					top: 2px;
+					width: 36px;
+					height: 36px;
+					object-fit: contain;
+				}
+
+				.flight {
+					left: 60px;
+					color: c.$title-color;
+				}
+
+				.time {
+					left: 255px;
+				}
+
+				.status {
+					left: 400px;
+
+					&.on-time {
+						color: #7CFC00;
+					}
+
+					&.scheduled {
+						color: white;
+					}
+
+					&.delayed {
+						color: yellow;
+					}
+
+					&.cancelled {
+						color: #ff4040;
+					}
+				}
+			}
+		}
+
+		.departures-footer {
+			position: absolute;
+			bottom: 6px;
+			width: 100%;
+			text-align: center;
+			font-family: 'Star4000 Small';
+			font-size: 20pt;
+			color: c.$title-color;
+			@include u.text-shadow();
+		}
+	}
+}

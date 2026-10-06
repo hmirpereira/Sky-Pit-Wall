@@ -22,6 +22,7 @@ Personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-
 - **Hazards**: IPMA (Portuguese weather service) warnings for the Porto district, shown in Portuguese by choice. Only yellow, orange and red warnings are shown; the screen is skipped when there are none.
 - **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
 - **Travel Forecast**: Open-Meteo forecast for Frankfurt, Munich, Zurich, Geneva and Vienna (edit `TRAVEL_CITIES` in `travelforecast.mjs`).
+- **Departures** (off by default): next Lufthansa Group departures from Porto (LH, LX, OS, 4Y) with estimated time and status. Data from [AeroDataBox](https://aerodatabox.com), fetched by a small service on the Raspberry Pi that keeps the API key private and serves `http://127.0.0.1:8095/flights.json`. Without that service the screen is skipped.
 
 **Fixes**
 - Auto refresh never started when a display stayed in "loading" (e.g. Hazards) or after a failed data request.
