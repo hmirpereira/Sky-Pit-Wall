@@ -8,6 +8,9 @@ import { registerDisplay } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 
 const STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/driverstandings/';
+// the standings list every team a driver raced for this season, in no particular order,
+// so each driver's current team is taken from the latest race
+const LAST_RACE_URL = 'https://api.jolpi.ca/ergast/f1/current/last/results/';
 // scrolling: one step = one pixel per baseDelay (20 ms, i.e. 50 px/s at normal speed)
 const ROW_HEIGHT = 40; // keep in sync with _f1-standings.scss
 const VISIBLE_HEIGHT = 280; // 7 rows
@@ -19,7 +22,8 @@ const HOLD = 150; // steps (3 s) before scrolling and at the end
 const UPDATE_WEEKDAYS = [5, 6, 7, 1]; // 1 = Monday ... 7 = Sunday
 const UPDATE_HOUR = 22;
 const UPDATE_TZ = 'Europe/Lisbon';
-const CACHE_KEY = 'f1-standings-cache';
+// v2: the team now comes from the latest race (older copies may show the wrong team)
+const CACHE_KEY = 'f1-standings-cache-v2';
 
 // most recent update time that has already passed
 const lastUpdateSlot = () => {
@@ -67,6 +71,11 @@ class F1Standings extends WeatherDisplay {
 		if (!fresh) {
 			try {
 				const response = await json(STANDINGS_URL);
+				const lastRace = await json(LAST_RACE_URL).catch(() => null);
+				const teamInLastRace = {};
+				(lastRace?.MRData?.RaceTable?.Races?.[0]?.Results ?? []).forEach((result) => {
+					teamInLastRace[result.Driver?.driverId] = result.Constructor?.constructorId;
+				});
 				const list = response?.MRData?.StandingsTable?.StandingsLists?.[0];
 				cache = {
 					fetched: DateTime.now().toISO(),
@@ -76,8 +85,8 @@ class F1Standings extends WeatherDisplay {
 						position: standing.positionText ?? standing.position,
 						name: standing.Driver?.familyName ?? standing.Driver?.code ?? '',
 						points: standing.points,
-						// a driver who changed teams lists several; the last one is the current team
-						team: standing.Constructors?.at(-1)?.constructorId ?? '',
+						// team in the latest race; if the driver missed it, the last team listed
+						team: teamInLastRace[standing.Driver?.driverId] ?? standing.Constructors?.at(-1)?.constructorId ?? '',
 					})),
 				};
 				writeCache(cache);
