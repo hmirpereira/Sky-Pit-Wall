@@ -33,8 +33,9 @@
 			}
 		}
 
+		// 310px in total: headers 30 + rows 246 (6 x 41) + footer 34
 		.departures-lines {
-			height: 280px;
+			height: 246px;
 			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
 					c.$gradient-main-background-1 136px,
 					c.$gradient-main-background-1 202px,
@@ -43,7 +44,7 @@
 
 			.departures-row {
 				position: relative;
-				height: 40px;
+				height: 41px;
 				font-family: 'Star4000 Large';
 				font-size: 24pt;
 				color: white;
@@ -96,13 +97,16 @@
 			}
 		}
 
+		// below the rows (not on top of them)
 		.departures-footer {
-			position: absolute;
-			bottom: 6px;
+			// same colour as the bottom of the rows, so the screen reads as one panel
+			background-color: c.$gradient-main-background-2;
+			height: 34px;
+			line-height: 34px;
 			width: 100%;
 			text-align: center;
 			font-family: 'Star4000 Small';
-			font-size: 20pt;
+			font-size: 16pt;
 			color: c.$title-color;
 			@include u.text-shadow();
 		}

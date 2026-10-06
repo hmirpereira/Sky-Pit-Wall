@@ -11,7 +11,8 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 
 const SERVICE_URL = 'http://127.0.0.1:8095/flights.json';
 const AIRPORT_TZ = 'Europe/Lisbon';
-const ROWS_PER_PAGE = 7;
+// leaves room for the footer; busy days use pages (7 flights = 4 + 3)
+const ROWS_PER_PAGE = 6;
 // departed flights leave the list; cancelled ones stay a little after their scheduled time
 const KEEP_AFTER_DEPARTURE_MIN = 5;
 const KEEP_CANCELLED_MIN = 30;
@@ -96,11 +97,12 @@ class Departures extends WeatherDisplay {
 		list.innerHTML = '';
 		list.append(...lines);
 
-		const updated = this.lastUpdate ? `Updated ${ConversionHelpers.formatTime(this.lastUpdate)}` : '';
-		this.elem.querySelector('.departures-footer').innerHTML = `${updated} &nbsp; Data: AeroDataBox`;
-
-		const pageText = this.pages.length > 1 ? ` ${pageIndex + 1}/${this.pages.length}` : '';
-		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `Lufthansa Group${pageText}`;
+		// the page number goes in the footer: the title has no room left for it
+		const parts = [];
+		if (this.lastUpdate) parts.push(`Updated ${ConversionHelpers.formatTime(this.lastUpdate)}`);
+		if (this.pages.length > 1) parts.push(`Page ${pageIndex + 1}/${this.pages.length}`);
+		parts.push('Data: AeroDataBox');
+		this.elem.querySelector('.departures-footer').innerHTML = parts.join(' &nbsp; ');
 
 		this.finishDraw();
 	}
