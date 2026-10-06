@@ -1,6 +1,6 @@
 # Sky Pit Wall
 
-Weather, Porto departures and a pit wall attitude on a kitchen TV. A personal fork of [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international); see [About this fork](#sky-pit-wall-this-fork) below. The original README follows.
+Weather, Porto departures and a pit wall attitude on a kitchen TV. A personal fork of [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international); see [Sky Pit Wall (this fork)](#sky-pit-wall-this-fork) below. The original README follows.
 
 [![build-docker](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml)
 [![pages-build-deployment](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment)
@@ -17,30 +17,69 @@ A live version of this project is available at https://mwood77.github.io/ws4kp-i
 
 ## Sky Pit Wall (this fork)
 
-Sky Pit Wall is a personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international), running on a kitchen TV from a Raspberry Pi in kiosk mode. Live version: https://hmirpereira.github.io/ws4kp-international
+Sky Pit Wall is a personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international). It runs full screen on a 1080p kitchen TV from a Raspberry Pi 3 (DietPi, Chromium in kiosk mode, widescreen, 24-hour clock), with background music, for Maia, near Porto, Portugal.
 
-### Changes from upstream
+Live version: https://hmirpereira.github.io/ws4kp-international
 
-**New and reworked screens**
-- **Airport METAR**: LPPR (Porto) METAR decoded into plain English, with the raw report underneath. Busy reports are split into pages. Source: [metar.vatsim.net](https://metar.vatsim.net) (CORS-enabled, no key).
-- **Hazards**: IPMA (Portuguese weather service) warnings for the Porto district, shown in Portuguese by choice. Only yellow, orange and red warnings are shown; the screen is skipped when there are none.
+### Screens
+
+In rotation order, as configured on the TV:
+
+| Screen | What it shows | Source |
+|---|---|---|
+| Hazards | IPMA warnings for the Porto district (in Portuguese); skipped when there are none | [IPMA](https://api.ipma.pt) |
+| Current Conditions, Hourly Forecast, Hourly Graph, Extended Forecast, Almanac, Air Quality | As upstream | [Open-Meteo](https://open-meteo.com) |
+| Travel Forecast | Frankfurt, Munich, Zurich, Geneva and Vienna | Open-Meteo |
+| Local Radar | As upstream | [RainViewer](https://www.rainviewer.com) |
+| Pollen | Daily pollen levels | Open-Meteo (CAMS) |
+| Airport METAR | Porto (LPPR) METAR decoded into plain English | [metar.vatsim.net](https://metar.vatsim.net) |
+| Departures | Next Lufthansa Group departures from Porto (only on the Pi) | [AeroDataBox](https://aerodatabox.com) |
+| F1 Drivers | Drivers' championship, scrolling through the whole field | [Jolpica F1](https://github.com/jolpica/jolpica-f1) |
+| F1 Next Race | Track, details and countdown; weekend schedule and race forecast | Jolpica F1, [f1-circuits](https://github.com/bacinger/f1-circuits), Open-Meteo |
+
+Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Personal Weather Station are left as upstream but switched off on the TV.
+
+### New and reworked screens
+
+- **Hazards**: warnings from IPMA (the Portuguese weather service) for the Porto district, kept in Portuguese on purpose, without accents (the Star4000 fonts have none). Only yellow, orange and red warnings; the screen is skipped when there are none. In widescreen the warning colour fills the whole width.
+- **Airport METAR**: LPPR METAR decoded into plain English (wind, visibility, weather, clouds, temperature, humidity, pressure, trend). Busy reports are split into pages; the raw report is shown when there is room.
 - **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
-- **Travel Forecast**: Open-Meteo forecast for Frankfurt, Munich, Zurich, Geneva and Vienna (edit `TRAVEL_CITIES` in `travelforecast.mjs`).
-- **F1 Drivers**: the current Formula 1 drivers' championship, scrolling through the whole field, with a team icon per driver (`server/images/teams/<constructorId>.png`). Source: [Jolpica F1](https://github.com/jolpica/jolpica-f1) (no key, CORS-enabled).
-- **Departures** (off by default): next Lufthansa Group departures from Porto (LH, LX, OS, 4Y) with estimated time and status. Data from [AeroDataBox](https://aerodatabox.com), fetched by a small service on the Raspberry Pi that keeps the API key private and serves `http://127.0.0.1:8095/flights.json`. Without that service the screen is skipped.
+- **Travel Forecast**: one Open-Meteo request for the cities in `TRAVEL_CITIES` (`travelforecast.mjs`); after 18:00 it shows tomorrow.
+- **Departures** (off by default): next departures of LH, LX, OS and 4Y from Porto, with an airline tail icon, estimated time and status (ON TIME, DELAYED, CANCELLED, or SCHEDULED when there is no live data). Codeshares are left out; a delay counts from 15 minutes. The data comes from a small service on the Raspberry Pi (`ws4kp-voos`, not in this repository) that calls the AeroDataBox FIDS API with a private key, spreads the monthly quota over the days left, and serves `http://127.0.0.1:8095/flights.json`. Chromium on the Pi allows the site to read it through the `LocalNetworkAccessAllowedForUrls` and `LoopbackNetworkAllowedForUrls` policies. Anywhere else the screen is skipped.
+- **F1 Drivers**: the whole drivers' championship, 7 rows at a time, scrolling like the Travel Forecast, with a team icon per driver. Each driver's current team comes from the latest race (the standings list every team a driver raced for, in no particular order).
+- **F1 Next Race**: page 1 has the track outline, Grand Prix, circuit, place with an 8-bit flag, track length, date and countdown; page 2 has the weekend schedule in Portuguese time and the forecast at the circuit for the start of the race (from 15 days before). Outlines for the 2026 circuits plus Portimão and Istanbul Park (2027) are in `utils/f1-circuits.mjs`.
+- **F1 update rule**: both F1 screens download their data once a day from Friday to Monday after 22:00 (Lisbon) and keep it in `localStorage` the rest of the week (`utils/f1-update.mjs`). Monday catches races in the Americas, which end late on Sunday in Portugal.
 
-**Fixes**
+### Look and feel
+
+- **Name and logo**: the site is called Sky Pit Wall (title, loading and progress screens, manifest). The header logo is `images/skypitwalllogo.png`, shown at the size of the original logo; the original `Logo3.png` is kept.
+- **F1 screens in red and black**: recoloured copies of the WeatherStar backgrounds (`BackGround1_1_f1.png`, `BackGround1_1_wide_f1.png`) and colours in `_f1-theme.scss`. Colours only; no Formula 1 marks.
+- **Icons**: `images/airlines/<IATA code>.png` (airline tails) and `images/teams/<constructorId>.png` (F1 teams), 128 x 128 PNG with a transparent background, drawn by the owner of this fork. `images/flags/<country>.png` are 24 x 16 pixel flags scaled up without smoothing. A missing icon or flag is simply not shown.
+
+### Fixes
+
 - Auto refresh never started when a display stayed in "loading" (e.g. Hazards) or after a failed data request.
 - The Hazards screen was never hidden, which stalled the rotation as soon as there was a warning.
 - "Last Update" always showed "(none)".
 - Missing weather icons: fog, freezing drizzle and rain, hail and violent rain showers.
-- Times now follow the "Hours Format" setting everywhere (Hourly Forecast, Almanac, Radar, Local Forecast text).
+- Times follow the "Hours Format" setting everywhere (Hourly Forecast, Almanac, Radar, Local Forecast text).
+- The GPS (current location) button still expected a reply from the US weather service (NOAA) and stalled; it now turns the coordinates into a place name (ArcGIS reverse geocoding) and asks to type a city when the browser gives no position.
+- The menu button with no location chosen drew the progress screen under the start screen; it now focuses the search box.
 - METAR to weather code conversion for personal weather stations (test order and codes).
 - Webamp pinned to a fixed version instead of `@next`; image preloads resolve relative to the page.
 
 ### Updating the live site
 
-Edit the sources, run `npm run build:css` and `npm run build`, and commit the `docs/` folder together with the sources. GitHub Pages serves `docs/` from `main`.
+Edit the sources, run `npm run build:css` and `npm run build`, and commit the `docs/` folder together with the sources. GitHub Pages serves `docs/` from `main`. The Pi only loads new code when Chromium restarts.
+
+To replace an icon, flag or the logo without building, put the new file with the same name in both `server/images/...` and `docs/images/...` (otherwise the next build brings the old one back). GitHub Pages lets browsers cache images for 10 minutes.
+
+### Credits
+
+- Based on [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international) by [@mwood77](https://github.com/mwood77) and [ws4kp](https://github.com/netbymatt/ws4kp) by [@netbymatt](https://github.com/netbymatt) (MIT License).
+- Track outlines from [bacinger/f1-circuits](https://github.com/bacinger/f1-circuits), MIT License, Copyright (c) 2019-2025 Tomislav Bacinger.
+- Data: Open-Meteo, IPMA, RainViewer, metar.vatsim.net, Jolpica F1, AeroDataBox.
+- Personal, non-commercial project. Not affiliated with The Weather Channel, Formula 1, the FIA, the Lufthansa Group or any team or airline; their names and marks belong to their owners.
 
 ## About
 
