@@ -1,0 +1,88 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+// 310px = headers 30 + rows 280 (7 x 40 visible, the rest scrolls into view)
+.weather-display .main.f1-standings {
+	&.main {
+		overflow: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			height: 30px;
+			position: relative;
+
+			div {
+				position: absolute;
+				top: -4px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+			}
+
+			.position {
+				left: 40px;
+			}
+
+			.driver {
+				left: 170px;
+			}
+
+			.points {
+				right: 60px;
+			}
+		}
+
+		// scrollTop is set in f1standings.mjs
+		.f1-lines {
+			height: 280px;
+			overflow: hidden;
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.f1-row {
+				position: relative;
+				height: 40px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: white;
+				@include u.text-shadow();
+
+				>div {
+					position: absolute;
+					top: 4px;
+					white-space: pre;
+				}
+
+				.position {
+					left: 40px;
+					width: 50px;
+					text-align: right;
+					color: c.$title-color;
+				}
+
+				// team icon (square image, shown 36 x 36)
+				.team {
+					position: absolute;
+					left: 120px;
+					top: 2px;
+					width: 36px;
+					height: 36px;
+					object-fit: contain;
+				}
+
+				.driver {
+					left: 170px;
+				}
+
+				.points {
+					right: 60px;
+					text-align: right;
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,17 @@
+<%- include('header.ejs', {titleDual:{ top: 'F1 Drivers' , bottom: 'Standings' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll f1-standings">
+		<div class="column-headers">
+			<div class="position">POS</div>
+			<div class="driver">DRIVER</div>
+			<div class="points">PTS</div>
+		</div>
+		<div class="f1-lines">
+			<div class="f1-row template">
+				<div class="position"></div>
+				<img class="team" alt="" />
+				<div class="driver"></div>
+				<div class="points"></div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

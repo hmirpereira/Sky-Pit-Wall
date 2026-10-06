@@ -38,3 +38,20 @@
 		}
 	}
 }
+// widescreen: the warning colour covers the side panels too (107px each side),
+// not only the 4:3 area in the middle
+.wide #hazards-html {
+	&.show {
+		overflow: visible;
+	}
+
+	.main.hazards {
+		width: 854px;
+		margin-left: -107px;
+
+		.hazard-lines .hazard {
+			margin-left: 187px;
+			margin-right: 187px;
+		}
+	}
+}

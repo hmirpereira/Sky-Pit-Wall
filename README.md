@@ -1,3 +1,7 @@
+# Sky Pit Wall
+
+Weather, Porto departures and a pit wall attitude on a kitchen TV. A personal fork of [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international); see [About this fork](#sky-pit-wall-this-fork) below. The original README follows.
+
 [![build-docker](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml)
 [![pages-build-deployment](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment)
 
@@ -11,9 +15,9 @@ This project is a fork of [`ws4kp`](https://github.com/netbymatt/ws4kp) by [@net
 
 A live version of this project is available at https://mwood77.github.io/ws4kp-international
 
-## About this fork (hmirpereira)
+## Sky Pit Wall (this fork)
 
-Personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international), running on a kitchen TV from a Raspberry Pi in kiosk mode. Live version: https://hmirpereira.github.io/ws4kp-international
+Sky Pit Wall is a personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international), running on a kitchen TV from a Raspberry Pi in kiosk mode. Live version: https://hmirpereira.github.io/ws4kp-international
 
 ### Changes from upstream
 
@@ -22,6 +26,7 @@ Personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-
 - **Hazards**: IPMA (Portuguese weather service) warnings for the Porto district, shown in Portuguese by choice. Only yellow, orange and red warnings are shown; the screen is skipped when there are none.
 - **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
 - **Travel Forecast**: Open-Meteo forecast for Frankfurt, Munich, Zurich, Geneva and Vienna (edit `TRAVEL_CITIES` in `travelforecast.mjs`).
+- **F1 Drivers**: the current Formula 1 drivers' championship, scrolling through the whole field, with a team icon per driver (`server/images/teams/<constructorId>.png`). Source: [Jolpica F1](https://github.com/jolpica/jolpica-f1) (no key, CORS-enabled).
 - **Departures** (off by default): next Lufthansa Group departures from Porto (LH, LX, OS, 4Y) with estimated time and status. Data from [AeroDataBox](https://aerodatabox.com), fetched by a small service on the Raspberry Pi that keeps the API key private and serves `http://127.0.0.1:8095/flights.json`. Without that service the screen is skipped.
 
 **Fixes**

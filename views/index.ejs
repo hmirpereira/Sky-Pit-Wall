@@ -4,11 +4,11 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>WeatherStar 4000+ International</title>
-  <meta name="description" content="Web based WeatherStar 4000 simulator that reports current and forecast weather conditions plus a few extras!" />
-  <meta name="keywords" content="WeatherStar 4000+" />
+  <title>Sky Pit Wall</title>
+  <meta name="description" content="Weather, Porto departures and a pit wall attitude, in the style of the WeatherStar 4000. Based on WeatherStar 4000+ International." />
+  <meta name="keywords" content="Sky Pit Wall, WeatherStar 4000+" />
   <meta name="author" content="Michael Wood" />
-  <meta name="application-name" content="WeatherStar 4000+ International" />
+  <meta name="application-name" content="Sky Pit Wall" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -92,7 +92,7 @@
     <div id="container">
       <div id="loading" width="640" height="480">
         <div>
-          <div class="title">WeatherStar 4000+ (Intl)</div>
+          <div class="title">Sky Pit Wall</div>
 					<div class="version">v<%- version %></div>
           <div class="instructions">Enter your location above to continue</div>
         </div>
@@ -151,6 +151,9 @@
       <div id="departures-html" class="weather-display">
         <%- include('partials/departures.ejs') %>
       </div>
+      <div id="f1-standings-html" class="weather-display">
+        <%- include('partials/f1-standings.ejs') %>
+      </div>
     </div>
     <div id="divTwcBottom">
       <div id="divTwcBottomLeft">
@@ -185,7 +188,7 @@
   <div style="height: 50px; width:400px" id="webamp-app"></div>
 
   <div class="info">
-    This is a simulation of The Weather Channel's (TWC) WeatherStar 4000+
+    Sky Pit Wall is based on WeatherStar 4000+ International, a simulation of The Weather Channel's (TWC) WeatherStar 4000+
     <br />
     <br />
     Background info, linking, Q&A, other uses, and questions?<br />
