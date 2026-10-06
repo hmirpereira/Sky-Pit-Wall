@@ -49,6 +49,7 @@ const mjsSources = [
 	'server/scripts/modules/metar.mjs',
 	'server/scripts/modules/departures.mjs',
 	'server/scripts/modules/f1standings.mjs',
+	'server/scripts/modules/f1nextrace.mjs',
 	'server/scripts/modules/progress.mjs',
 	'server/scripts/index.mjs',
 ];

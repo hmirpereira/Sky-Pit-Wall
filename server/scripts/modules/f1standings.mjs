@@ -5,7 +5,7 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import { DateTime } from '../vendor/auto/luxon.mjs';
+import { readCache, writeCache, isFresh } from './utils/f1-update.mjs';
 
 const STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/driverstandings/';
 // the standings list every team a driver raced for this season, in no particular order,
@@ -16,42 +16,8 @@ const ROW_HEIGHT = 40; // keep in sync with _f1-standings.scss
 const VISIBLE_HEIGHT = 280; // 7 rows
 const HOLD = 150; // steps (3 s) before scrolling and at the end
 
-// the standings only change on race weekends: download them once a day on these days,
-// from this hour (Portuguese time) on; the rest of the time the saved copy is shown
-// Friday to Monday at 22h: Monday catches races in the Americas, which end late on Sunday in Lisbon
-const UPDATE_WEEKDAYS = [5, 6, 7, 1]; // 1 = Monday ... 7 = Sunday
-const UPDATE_HOUR = 22;
-const UPDATE_TZ = 'Europe/Lisbon';
 // v2: the team now comes from the latest race (older copies may show the wrong team)
 const CACHE_KEY = 'f1-standings-cache-v2';
-
-// most recent update time that has already passed
-const lastUpdateSlot = () => {
-	const now = DateTime.now().setZone(UPDATE_TZ);
-	for (let back = 0; back <= 7; back += 1) {
-		const slot = now.minus({ days: back }).set({
-			hour: UPDATE_HOUR, minute: 0, second: 0, millisecond: 0,
-		});
-		if (UPDATE_WEEKDAYS.includes(slot.weekday) && slot <= now) return slot;
-	}
-	return now.minus({ days: 7 });
-};
-
-const readCache = () => {
-	try {
-		return JSON.parse(window.localStorage.getItem(CACHE_KEY));
-	} catch {
-		return null;
-	}
-};
-
-const writeCache = (data) => {
-	try {
-		window.localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-	} catch {
-		// storage unavailable: the next refresh simply downloads again
-	}
-};
 
 class F1Standings extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -66,9 +32,8 @@ class F1Standings extends WeatherDisplay {
 	async getData(_weatherParameters) {
 		if (!super.getData(_weatherParameters)) return;
 
-		let cache = readCache();
-		const fresh = cache?.fetched && DateTime.fromISO(cache.fetched) >= lastUpdateSlot();
-		if (!fresh) {
+		let cache = readCache(CACHE_KEY);
+		if (!isFresh(cache)) {
 			try {
 				const response = await json(STANDINGS_URL);
 				const lastRace = await json(LAST_RACE_URL).catch(() => null);
@@ -78,7 +43,6 @@ class F1Standings extends WeatherDisplay {
 				});
 				const list = response?.MRData?.StandingsTable?.StandingsLists?.[0];
 				cache = {
-					fetched: DateTime.now().toISO(),
 					round: list?.round,
 					season: list?.season,
 					drivers: (list?.DriverStandings ?? []).map((standing) => ({
@@ -89,7 +53,7 @@ class F1Standings extends WeatherDisplay {
 						team: teamInLastRace[standing.Driver?.driverId] ?? standing.Constructors?.at(-1)?.constructorId ?? '',
 					})),
 				};
-				writeCache(cache);
+				writeCache(CACHE_KEY, cache);
 			} catch (error) {
 				// keep showing the saved copy if there is one
 				console.error('F1Standings: unable to get the standings', error);
