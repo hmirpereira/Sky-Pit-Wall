@@ -1,0 +1,31 @@
+// F1 screens: red and black instead of the WeatherStar blue, purple and orange
+// (colours only; no Formula 1 marks)
+$f1-red: #e10600;
+$f1-accent: #ff4a3d;
+$f1-row-1: #6a0b0b;
+$f1-row-2: #140405;
+$f1-column-header: #050102;
+$f1-text: white;
+
+@mixin f1-rows-background {
+	background: repeating-linear-gradient(0deg, $f1-row-2 0px,
+			$f1-row-1 136px,
+			$f1-row-1 202px,
+			$f1-row-2 338px,
+		);
+}
+
+// frame and header band: recoloured copies of the WeatherStar backgrounds
+#f1-standings-html,
+#f1-next-race-html {
+	background-image: url(../images/BackGround1_1_f1.png);
+
+	.header .title {
+		color: $f1-text;
+	}
+}
+
+.wide.f1-standings #container,
+.wide.f1-next-race #container {
+	background: url(../images/BackGround1_1_wide_f1.png);
+}

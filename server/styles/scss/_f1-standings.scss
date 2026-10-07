@@ -1,5 +1,6 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'f1-theme'as f1;
 
 // 310px = headers 30 + rows 280 (7 x 40 visible, the rest scrolls into view)
 .weather-display .main.f1-standings {
@@ -7,7 +8,7 @@
 		overflow: hidden;
 
 		.column-headers {
-			background-color: c.$column-header;
+			background-color: f1.$f1-column-header;
 			height: 30px;
 			position: relative;
 
@@ -16,7 +17,7 @@
 				top: -4px;
 				font-family: 'Star4000 Small';
 				font-size: 24pt;
-				color: c.$column-header-text;
+				color: f1.$f1-text;
 				@include u.text-shadow();
 			}
 
@@ -37,11 +38,7 @@
 		.f1-lines {
 			height: 280px;
 			overflow: hidden;
-			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
-					c.$gradient-main-background-1 136px,
-					c.$gradient-main-background-1 202px,
-					c.$gradient-main-background-2 338px,
-				);
+			@include f1.f1-rows-background;
 
 			.f1-row {
 				position: relative;
@@ -61,7 +58,7 @@
 					left: 40px;
 					width: 50px;
 					text-align: right;
-					color: c.$title-color;
+					color: f1.$f1-accent;
 				}
 
 				// team icon (square image, shown 36 x 36)
