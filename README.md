@@ -32,7 +32,7 @@ In rotation order, as configured on the TV:
 | Travel Forecast | Frankfurt, Munich, Zurich, Geneva and Vienna | Open-Meteo |
 | Local Radar | As upstream | [RainViewer](https://www.rainviewer.com) |
 | Pollen | Daily pollen levels | Open-Meteo (CAMS) |
-| Airport METAR | Porto (LPPR) METAR decoded into plain English | [metar.vatsim.net](https://metar.vatsim.net) |
+| Airport METAR | Porto (LPPR) METAR and TAF decoded into plain English | [metar.vatsim.net](https://metar.vatsim.net); TAF from [aviationweather.gov](https://aviationweather.gov) via the Raspberry Pi |
 | Departures | Next Lufthansa Group departures from Porto (only on the Pi) | [AeroDataBox](https://aerodatabox.com) |
 | F1 Drivers | Drivers' championship, scrolling through the whole field | [Jolpica F1](https://github.com/jolpica/jolpica-f1) |
 | F1 Next Race | Track, details and countdown; weekend schedule and race forecast | Jolpica F1, [f1-circuits](https://github.com/bacinger/f1-circuits), Open-Meteo |
@@ -42,7 +42,7 @@ Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Pers
 ### New and reworked screens
 
 - **Hazards**: warnings from IPMA (the Portuguese weather service) for the Porto district, kept in Portuguese on purpose, without accents (the Star4000 fonts have none). Only yellow, orange and red warnings; the screen is skipped when there are none. In widescreen the warning colour fills the whole width.
-- **Airport METAR**: LPPR METAR decoded into plain English (wind, visibility, weather, clouds, temperature, humidity, pressure, trend). Busy reports are split into pages; the raw report is shown when there is room.
+- **Airport METAR**: LPPR METAR decoded into plain English (wind, visibility, weather, clouds, temperature, humidity, pressure, trend). Busy reports are split into pages; the raw report is shown when there is room. When the page runs on the Raspberry Pi, the LPPR TAF follows on its own pages: issue time, then each change group (Becoming, Temporary, Prob 30%, From) with its period in Portuguese time and its conditions (the raw TAF is not shown). aviationweather.gov does not accept browser requests, so the TAF is fetched by the `ws4kp-voos` service on the Pi and read from `http://127.0.0.1:8095/taf.json`; anywhere else the TAF pages are simply left out.
 - **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
 - **Travel Forecast**: one Open-Meteo request for the cities in `TRAVEL_CITIES` (`travelforecast.mjs`); after 18:00 it shows tomorrow.
 - **Departures** (off by default): next departures of LH, LX, OS and 4Y from Porto, with an airline tail icon, estimated time and status (ON TIME, DELAYED, CANCELLED, or SCHEDULED when there is no live data). Codeshares are left out; a delay counts from 15 minutes. The data comes from a small service on the Raspberry Pi (`ws4kp-voos`, not in this repository) that calls the AeroDataBox FIDS API with a private key, spreads the monthly quota over the days left, and serves `http://127.0.0.1:8095/flights.json`. Chromium on the Pi allows the site to read it through the `LocalNetworkAccessAllowedForUrls` and `LoopbackNetworkAllowedForUrls` policies. Anywhere else the screen is skipped.
