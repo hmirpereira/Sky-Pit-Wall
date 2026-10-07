@@ -1,0 +1,102 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.cancellations {
+	&.main {
+		overflow: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			// same layout as the Departures screen
+			height: 30px;
+			position: relative;
+
+			div {
+				position: absolute;
+				top: -4px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+			}
+
+			.flight {
+				left: 60px;
+			}
+
+			.destination {
+				left: 230px;
+			}
+
+			.time {
+				right: 20px;
+			}
+		}
+
+		// 310px in total: headers 30 + rows 246 (6 x 41) + footer 34
+		.cancellations-lines {
+			height: 246px;
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.cancellations-row {
+				position: relative;
+				height: 41px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: white;
+				@include u.text-shadow();
+
+				>div {
+					position: absolute;
+					top: 4px;
+					white-space: pre;
+				}
+
+				// airline tail icon (square image, shown 36 x 36)
+				.tail {
+					position: absolute;
+					left: 14px;
+					top: 2px;
+					width: 36px;
+					height: 36px;
+					object-fit: contain;
+				}
+
+				.flight {
+					left: 60px;
+					color: c.$title-color;
+				}
+
+				// long city names are cut so they never reach the time
+				.destination {
+					left: 230px;
+					width: 205px;
+					overflow: hidden;
+				}
+
+				.time {
+					right: 20px;
+					color: #ff4040;
+				}
+			}
+		}
+
+		// below the rows (not on top of them)
+		.cancellations-footer {
+			// same colour as the bottom of the rows, so the screen reads as one panel
+			background-color: c.$gradient-main-background-2;
+			height: 34px;
+			line-height: 34px;
+			width: 100%;
+			text-align: center;
+			font-family: 'Star4000 Small';
+			font-size: 16pt;
+			color: c.$title-color;
+			@include u.text-shadow();
+		}
+	}
+}
