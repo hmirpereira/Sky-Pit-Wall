@@ -1,0 +1,31 @@
+<%- include('header.ejs', {titleDual:{ top: 'F1 Next Race' , bottom: 'Round' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll f1-next-race">
+		<div class="f1-race-page info">
+			<div class="track">
+				<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+					<polyline class="outline-shadow" points="" />
+					<polyline class="outline" points="" />
+				</svg>
+			</div>
+			<div class="race-info"></div>
+		</div>
+		<div class="f1-race-page weekend">
+			<div class="column-headers">
+				<div class="day">DAY</div>
+				<div class="session">SESSION</div>
+				<div class="time">TIME</div>
+			</div>
+			<div class="session-lines">
+				<div class="session-row template">
+					<div class="day"></div>
+					<div class="session"></div>
+					<div class="time"></div>
+				</div>
+			</div>
+			<div class="race-forecast">
+				<div class="icon"><img alt="" /></div>
+				<div class="text"></div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>
