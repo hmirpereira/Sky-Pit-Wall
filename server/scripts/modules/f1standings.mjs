@@ -19,6 +19,9 @@ const HOLD = 150; // steps (3 s) before scrolling and at the end
 // v2: the team now comes from the latest race (older copies may show the wrong team)
 const CACHE_KEY = 'f1-standings-cache-v2';
 
+// the Star4000 fonts draw accented letters blank (Pérez -> P rez), so accents are removed
+const stripAccents = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 class F1Standings extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		super(navId, elemId, 'F1 Standings', defaultActive);
@@ -87,7 +90,7 @@ class F1Standings extends WeatherDisplay {
 		const lines = this.drivers.map((driver) => {
 			const row = this.fillTemplate('f1-row', {
 				position: driver.position,
-				driver: driver.name,
+				driver: stripAccents(driver.name),
 				points: driver.points,
 			});
 			// team icon: images/teams/<constructorId>.png (hidden if missing)

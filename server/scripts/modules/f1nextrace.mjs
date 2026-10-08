@@ -34,6 +34,9 @@ const toDateTime = (date, time) => DateTime.fromISO(`${date}T${time ?? '00:00:00
 
 const shortRaceName = (name) => name.replace('Grand Prix', 'GP');
 
+// the Star4000 fonts list accented letters but draw them blank (Autódromo -> Aut dromo), so accents are removed
+const stripAccents = (text) => (text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 const parseRace = (race) => {
 	const sessions = SESSIONS
 		.filter(([key]) => race[key])
@@ -169,7 +172,7 @@ class F1NextRace extends WeatherDisplay {
 		lines.forEach(([cls, text]) => {
 			const div = document.createElement('div');
 			div.className = cls;
-			div.textContent = text;
+			div.textContent = stripAccents(text);
 			// 8-bit flag after the country: images/flags/<country>.png (hidden if missing)
 			if (cls === 'place' && race.country) {
 				const flag = document.createElement('img');
@@ -182,6 +185,17 @@ class F1NextRace extends WeatherDisplay {
 				div.append(flag);
 			}
 			info.append(div);
+		});
+
+		// long circuit names (up to 34 characters, e.g. "Autódromo Internacional do Algarve")
+		// do not fit at the normal size: shrink the line until it fits, down to 70%
+		info.querySelectorAll(':scope > div').forEach((div) => {
+			let size = parseFloat(window.getComputedStyle(div).fontSize);
+			const minimum = size * 0.7;
+			while (div.clientWidth > 0 && div.scrollWidth > div.clientWidth && size > minimum) {
+				size -= 1;
+				div.style.fontSize = `${size}px`;
+			}
 		});
 	}
 

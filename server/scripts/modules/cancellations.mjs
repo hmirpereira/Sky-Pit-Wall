@@ -14,6 +14,8 @@ const AIRPORT_TZ = 'Europe/Lisbon';
 const ROWS_PER_PAGE = 6;
 // tail icons drawn so far (images/airlines/<IATA>.png); other airlines show none
 const TAIL_ICONS = ['LH', 'LX', 'OS', '4Y', 'SN'];
+// the Star4000 fonts draw accented letters blank (São Paulo -> S o Paulo), so accents are removed
+const stripAccents = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 class Cancellations extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -71,7 +73,7 @@ class Cancellations extends WeatherDisplay {
 			const timeText = time.hasSame(today, 'day') ? ConversionHelpers.formatTime(time) : `${time.toFormat('ccc')} ${ConversionHelpers.formatTime(time)}`;
 			const row = this.fillTemplate('cancellations-row', {
 				flight: flight.number,
-				destination: flight.destinationName ?? flight.destination ?? '',
+				destination: stripAccents(flight.destinationName ?? flight.destination ?? ''),
 				// "?" when AeroDataBox is not sure about the cancellation
 				time: `${timeText}${flight.uncertain ? '?' : ''}`,
 			});
