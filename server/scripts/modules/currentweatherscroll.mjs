@@ -2,6 +2,7 @@ import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
 import { getConditionText } from './utils/weather.mjs';
+import piProblems from './utils/pi-health.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
@@ -36,7 +37,7 @@ const incrementInterval = () => {
 		stop(display?.elemId === 'progress');
 		return;
 	}
-	screenIndex = (screenIndex + 1) % (screens.length);
+	screenIndex = (screenIndex + 1) % (allScreens().length);
 	// draw new text
 	drawScreen();
 };
@@ -48,7 +49,11 @@ const drawScreen = async () => {
 	// nothing to do if there's no data yet
 	if (!data) return;
 
-	drawCondition(screens[screenIndex](data));
+	const list = allScreens();
+	if (screenIndex >= list.length) screenIndex = 0;
+	const item = list[screenIndex];
+	// Pi warnings are drawn in red
+	drawCondition(typeof item === 'string' ? item : item(data), typeof item === 'string');
 };
 
 // the "screens" are stored in an array for easy addition and removal
@@ -104,8 +109,11 @@ const screens = [
 	},
 ];
 
+// the weather lines, then one line per warning from the Pi services (only when there is a problem)
+const allScreens = () => [...screens, ...piProblems()];
+
 // internal draw function with preset parameters
-const drawCondition = (text) => {
+const drawCondition = (text, warning = false) => {
 	elemForEach('.weather-display .scroll .fixed', (elem) => {
 		// Remove old text-layers with exit
 		const layers = elem.querySelectorAll('.text-layer');
@@ -119,7 +127,7 @@ const drawCondition = (text) => {
 
 		// Create new layer with wrapped content
 		const newLayer = document.createElement('div');
-		newLayer.className = 'text-layer';
+		newLayer.className = warning ? 'text-layer warning' : 'text-layer';
 		const content = document.createElement('div');
 		content.className = 'text-content';
 		content.textContent = text;

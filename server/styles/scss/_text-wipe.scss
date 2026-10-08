@@ -30,4 +30,9 @@
         clip-path: inset(0 0% 0 0); // Reveal left to right
     }
 
+    // warnings from the Raspberry Pi services (pi-health.mjs), in red so they stand out
+    .text-layer.warning .text-content {
+        color: #ff4040;
+    }
+
 }
