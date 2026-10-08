@@ -1,6 +1,6 @@
 # Sky Pit Wall
 
-Weather, Porto departures and a pit wall attitude on a kitchen TV. A personal fork of [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international); see [Sky Pit Wall (this fork)](#sky-pit-wall-this-fork) below. The original README follows.
+Weather, airport departures and a pit wall attitude on a TV. A personal fork of [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international); see [Sky Pit Wall (this fork)](#sky-pit-wall-this-fork) below. The original README follows.
 
 [![build-docker](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/build-docker.yaml)
 [![pages-build-deployment](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/mwood77/ws4kp-international/actions/workflows/pages/pages-build-deployment)
@@ -17,7 +17,7 @@ A live version of this project is available at https://mwood77.github.io/ws4kp-i
 
 ## Sky Pit Wall (this fork)
 
-Sky Pit Wall is a personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international). It runs full screen on a 1080p kitchen TV from a Raspberry Pi 3 (DietPi, Chromium in kiosk mode, widescreen, 24-hour clock), with background music, for Maia, near Porto, Portugal.
+Sky Pit Wall is a personal fork of [mwood77/ws4kp-international](https://github.com/mwood77/ws4kp-international). It runs full screen on a 1080p TV from a Raspberry Pi 3 (DietPi, Chromium in kiosk mode, widescreen, 24-hour clock), with background music, for the Porto area in Portugal.
 
 Live version: https://hmirpereira.github.io/Sky-Pit-Wall
 
@@ -33,9 +33,9 @@ In rotation order, as configured on the TV:
 | Local Radar | As upstream | [RainViewer](https://www.rainviewer.com) |
 | Pollen | Daily pollen levels | Open-Meteo (CAMS) |
 | Airport METAR | Porto (LPPR) METAR and TAF decoded into plain English | [metar.vatsim.net](https://metar.vatsim.net); TAF from [aviationweather.gov](https://aviationweather.gov) via the Raspberry Pi |
-| Departures | Next Lufthansa Group departures from Porto (only on the Pi) | [AeroDataBox](https://aerodatabox.com) |
+| Departures | Next departures from Porto for a configurable list of airlines (only on the Pi) | [AeroDataBox](https://aerodatabox.com) |
 | Cancellations | Cancelled departures from Porto, all airlines (only on the Pi) | [AeroDataBox](https://aerodatabox.com) |
-| Work Schedule | My shifts for the next 7 days (only on the Pi) | Private spreadsheet |
+| Work Schedule | Shifts for the next 7 days (only on the Pi) | Private spreadsheet |
 | F1 Drivers | Drivers' championship, scrolling through the whole field | [Jolpica F1](https://github.com/jolpica/jolpica-f1) |
 | F1 Next Race | Track, details and countdown; weekend schedule and race forecast | Jolpica F1, [f1-circuits](https://github.com/bacinger/f1-circuits), Open-Meteo |
 
@@ -47,9 +47,9 @@ Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Pers
 - **Airport METAR**: LPPR METAR decoded into plain English (wind, visibility, weather, clouds, temperature, humidity, pressure, trend). Busy reports are split into pages; the raw report is shown when there is room. When the page runs on the Raspberry Pi, the LPPR TAF follows on its own pages: issue time, then each change group (Becoming, Temporary, Prob 30%, From) with its period in Portuguese time and its conditions (the raw TAF is not shown). aviationweather.gov does not accept browser requests, so the TAF is fetched by the `skypitwall-voos` service on the Pi and read from `http://127.0.0.1:8095/taf.json`; anywhere else the TAF pages are simply left out.
 - **Pollen**: daily average from Open-Meteo / CAMS (Europe only), with US National Allergy Bureau levels as a guide.
 - **Travel Forecast**: one Open-Meteo request for the cities in `TRAVEL_CITIES` (`travelforecast.mjs`); after 18:00 it shows tomorrow.
-- **Departures** (off by default): next departures of LH, LX, OS and 4Y from Porto, with an airline tail icon, estimated time and status (ON TIME, DELAYED, CANCELLED, or SCHEDULED when there is no live data). Codeshares are left out; a delay counts from 15 minutes. The data comes from a small service on the Raspberry Pi (`skypitwall-voos`, not in this repository) that calls the AeroDataBox FIDS API with a private key, spreads the monthly quota over the days left, and serves `http://127.0.0.1:8095/flights.json`. Chromium on the Pi allows the site to read it through the `LocalNetworkAccessAllowedForUrls` and `LoopbackNetworkAllowedForUrls` policies. Anywhere else the screen is skipped.
-- **Cancellations** (off by default): today's cancelled departures from Porto, all airlines: flight, destination and scheduled time (a `?` marks a cancellation AeroDataBox is not sure about). It uses the same API responses as Departures, so there are no extra calls: the list is refreshed only when the service calls the API for the Lufthansa Group flights, and the footer shows when that was. Served at `http://127.0.0.1:8095/cancelled.json`; the screen is skipped when there are no cancellations or off the Pi.
-- **Work Schedule** (off by default): my shifts for the next 7 days (day, shift code, start and end, or Day off), today highlighted. A job on the Pi (`skypitwall-horario`, not in this repository) copies my schedule spreadsheet from OneDrive every hour with a read-only rclone remote and turns it into JSON, served at `http://127.0.0.1:8095/schedule.json`. The schedule never leaves the Pi; anywhere else the screen is skipped.
+- **Departures** (off by default): next departures from Porto for the airlines set on the Pi, with an airline tail icon, estimated time and status (ON TIME, DELAYED, CANCELLED, or SCHEDULED when there is no live data). Codeshares are left out; a delay counts from 15 minutes. The data comes from a small service on the Raspberry Pi (`skypitwall-voos`, not in this repository) that calls the AeroDataBox FIDS API with a private key, spreads the monthly quota over the days left, and serves `http://127.0.0.1:8095/flights.json`. Chromium on the Pi allows the site to read it through the `LocalNetworkAccessAllowedForUrls` and `LoopbackNetworkAllowedForUrls` policies. Anywhere else the screen is skipped.
+- **Cancellations** (off by default): today's cancelled departures from Porto, all airlines: flight, destination and scheduled time (a `?` marks a cancellation AeroDataBox is not sure about). It uses the same API responses as Departures, so there are no extra calls: the list is refreshed only when the service calls the API for the Departures screen, and the footer shows when that was. Served at `http://127.0.0.1:8095/cancelled.json`; the screen is skipped when there are no cancellations or off the Pi.
+- **Work Schedule** (off by default): shifts for the next 7 days (day, shift code, start and end, or Day off), today highlighted. A job on the Pi (`skypitwall-horario`, not in this repository) copies a private schedule spreadsheet from cloud storage every hour with a read-only rclone remote and turns it into JSON, served at `http://127.0.0.1:8095/schedule.json`. The schedule never leaves the Pi; anywhere else the screen is skipped.
 - **F1 Drivers**: the whole drivers' championship, 7 rows at a time, scrolling like the Travel Forecast, with a team icon per driver. Each driver's current team comes from the latest race (the standings list every team a driver raced for, in no particular order).
 - **F1 Next Race**: page 1 has the track outline, Grand Prix, circuit, place with an 8-bit flag, track length, date and countdown; page 2 has the weekend schedule in Portuguese time and the forecast at the circuit for the start of the race (from 15 days before). Outlines for the 2026 circuits plus Portimão, Istanbul Park and Bahrain (2027) are in `utils/f1-circuits.mjs`. Long circuit names are shrunk to fit, and accents are removed because the Star4000 fonts draw accented letters blank (also in F1 Drivers and Cancellations).
 - **F1 update rule**: both F1 screens download their data once a day from Friday to Monday after 22:00 (Lisbon) and keep it in `localStorage` the rest of the week (`utils/f1-update.mjs`). Monday catches races in the Americas, which end late on Sunday in Portugal.

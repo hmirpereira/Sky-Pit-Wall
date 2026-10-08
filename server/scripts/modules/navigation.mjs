@@ -110,8 +110,8 @@ const getWeather = async (latLon, haveDataCallback) => {
 	}
 
 	// pick the geocoding result closest to the coordinates we have weather for. Several places
-	// share names (Naples, Lincoln, Moreira...), and a lookup can also return nothing at all
-	// (e.g. a GPS query such as "41.2386, -8.6485"), so fall back to Open-Meteo's own timezone.
+	// share names (Naples, Lincoln, Springfield...), and a lookup can also return nothing at all
+	// (e.g. a GPS query such as "38.7223, -9.1393"), so fall back to Open-Meteo's own timezone.
 	const results = locality?.results ?? [];
 	const distanceTo = (result) => Math.abs(result.latitude - latLon.lat) + Math.abs(result.longitude - latLon.lon);
 	const closest = results.reduce((best, result) => (!best || distanceTo(result) < distanceTo(best) ? result : best), null);

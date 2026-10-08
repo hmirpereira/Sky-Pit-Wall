@@ -461,7 +461,7 @@ const btnGetGpsClick = async () => {
 	localStorage.setItem('latLonFromGPS', true);
 };
 
-// "Maia, Porto, Portugal" for a pair of coordinates (ArcGIS, the same service as the search box)
+// "Lisbon, Portugal" for a pair of coordinates (ArcGIS, the same service as the search box)
 const reverseGeocode = async (latitude, longitude) => {
 	try {
 		const result = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {

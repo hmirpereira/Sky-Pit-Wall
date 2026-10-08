@@ -1,6 +1,6 @@
-// Hugo's shifts for the next 7 days
+// work shifts for the next 7 days
 // Read from the skypitwall-voos service on the Raspberry Pi, which serves what skypitwall-horario
-// extracts from the schedule spreadsheet on OneDrive. The schedule never leaves the Pi;
+// extracts from a private schedule spreadsheet. The schedule never leaves the Pi;
 // anywhere else this screen is skipped.
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
