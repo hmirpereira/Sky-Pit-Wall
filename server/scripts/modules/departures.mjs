@@ -1,6 +1,6 @@
 // next Lufthansa Group departures from Porto (OPO)
 // Flight data comes from AeroDataBox through a small service on the Raspberry Pi
-// (ws4kp-voos), which keeps the API key private and serves the result on the Pi only.
+// (skypitwall-voos), which keeps the API key private and serves the result on the Pi only.
 // Anywhere else the service is not reachable and this screen is skipped.
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
@@ -108,5 +108,5 @@ class Departures extends WeatherDisplay {
 	}
 }
 
-// register display (off by default: it only works on the Pi running ws4kp-voos)
+// register display (off by default: it only works on the Pi running skypitwall-voos)
 registerDisplay(new Departures(16, 'departures', false));

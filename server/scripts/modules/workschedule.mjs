@@ -1,5 +1,5 @@
 // Hugo's shifts for the next 7 days
-// Read from the ws4kp-voos service on the Raspberry Pi, which serves what ws4kp-horario
+// Read from the skypitwall-voos service on the Raspberry Pi, which serves what skypitwall-horario
 // extracts from the schedule spreadsheet on OneDrive. The schedule never leaves the Pi;
 // anywhere else this screen is skipped.
 import STATUS from './status.mjs';
@@ -71,5 +71,5 @@ class WorkSchedule extends WeatherDisplay {
 	}
 }
 
-// register display (off by default: it only works on the Pi running ws4kp-voos and ws4kp-horario)
+// register display (off by default: it only works on the Pi running skypitwall-voos and skypitwall-horario)
 registerDisplay(new WorkSchedule(18, 'work-schedule', false));

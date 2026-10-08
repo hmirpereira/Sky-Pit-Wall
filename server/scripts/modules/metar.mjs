@@ -17,7 +17,7 @@ const STATION = {
 // metar.vatsim.net mirrors real-world METARs and allows browser (CORS) requests without a key
 const METAR_URL = (icao) => `https://metar.vatsim.net/${icao}`;
 
-// the TAF comes from the ws4kp-voos service on the Raspberry Pi, which fetches it from
+// the TAF comes from the skypitwall-voos service on the Raspberry Pi, which fetches it from
 // aviationweather.gov (no browser requests allowed there); elsewhere there are no TAF pages
 const TAF_URL = 'http://127.0.0.1:8095/taf.json';
 const LOCAL_TZ = 'Europe/Lisbon';

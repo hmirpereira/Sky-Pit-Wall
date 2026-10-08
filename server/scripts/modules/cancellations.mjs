@@ -1,5 +1,5 @@
 // cancelled departures from Porto (OPO), all airlines
-// Comes from the same ws4kp-voos service on the Raspberry Pi as the Departures screen. The list is
+// Comes from the same skypitwall-voos service on the Raspberry Pi as the Departures screen. The list is
 // only refreshed when the service calls AeroDataBox for the Lufthansa Group flights (no extra calls),
 // so the footer shows when it was last updated. Anywhere else this screen is skipped.
 import STATUS from './status.mjs';
@@ -98,5 +98,5 @@ class Cancellations extends WeatherDisplay {
 	}
 }
 
-// register display (off by default: it only works on the Pi running ws4kp-voos)
+// register display (off by default: it only works on the Pi running skypitwall-voos)
 registerDisplay(new Cancellations(17, 'cancellations', false));
