@@ -1,0 +1,70 @@
+// aviation screens (Airport METAR/TAF, Departures, Cancellations): navy and silver instead of the
+// WeatherStar blue, purple and orange, with yellow flight numbers (colours only; no airline marks)
+$av-row-1: #0b2470;
+$av-row-2: #020b2e;
+$av-column-header: #010618;
+$av-light-blue: #a9c4ef;
+$av-raw: #8fa6cc;
+$av-yellow: #ffad00;
+
+@mixin av-rows-background {
+	background: repeating-linear-gradient(0deg, $av-row-2 0px,
+			$av-row-1 136px,
+			$av-row-1 202px,
+			$av-row-2 338px,
+		);
+}
+
+// frame and header band: recoloured copies of the WeatherStar backgrounds
+// (silver to steel blue band, so the white title keeps its usual shadow)
+#metar-html,
+#departures-html,
+#cancellations-html {
+	background-image: url(../images/BackGround1_1_aviation.png);
+
+	.header .title {
+		color: white;
+	}
+}
+
+.wide.metar #container,
+.wide.departures #container,
+.wide.cancellations #container {
+	background: url(../images/BackGround1_1_wide_aviation.png);
+}
+
+.weather-display .main.metar.main {
+	.metar-lines .metar-row .label {
+		color: $av-light-blue;
+	}
+
+	.metar-raw {
+		color: $av-raw;
+	}
+}
+
+.weather-display .main.departures.main,
+.weather-display .main.cancellations.main {
+	.column-headers {
+		background-color: $av-column-header;
+
+		div {
+			color: $av-light-blue;
+		}
+	}
+
+	.departures-lines,
+	.cancellations-lines {
+		@include av-rows-background;
+
+		.flight {
+			color: $av-yellow;
+		}
+	}
+
+	.departures-footer,
+	.cancellations-footer {
+		background-color: $av-row-2;
+		color: $av-light-blue;
+	}
+}
