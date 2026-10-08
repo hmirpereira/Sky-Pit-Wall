@@ -56,6 +56,7 @@ Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Pers
 
 - **Name and logo**: the site is called Sky Pit Wall (title, loading and progress screens, manifest). The header logo is `images/skypitwalllogo.png`, shown at the size of the original logo; the original `Logo3.png` is kept.
 - **F1 screens in red and black**: recoloured copies of the WeatherStar backgrounds (`BackGround1_1_f1.png`, `BackGround1_1_wide_f1.png`) and colours in `_f1-theme.scss`. Colours only; no Formula 1 marks.
+- **Aviation screens in navy and silver** (Airport METAR/TAF, Departures, Cancellations): recoloured copies of the WeatherStar backgrounds (`BackGround1_1_aviation.png`, `BackGround1_1_wide_aviation.png`) with a silver to steel blue title band, navy rows, light blue labels and yellow flight numbers. Colours in `_aviation-theme.scss`. Colours only; no airline marks.
 - **Icons**: `images/airlines/<IATA code>.png` (airline tails) and `images/teams/<constructorId>.png` (F1 teams), 128 x 128 PNG with a transparent background, drawn by the owner of this fork. `images/flags/<country>.png` are 24 x 16 pixel flags scaled up without smoothing. A missing icon or flag is simply not shown.
 
 ### Fixes
