@@ -1,4 +1,4 @@
-// aviation screens (Airport METAR/TAF, Departures, Cancellations): navy and silver instead of the
+// aviation screens (Airport METAR/TAF, Departures, Cancellations, Work Schedule): navy and silver instead of the
 // WeatherStar blue, purple and orange, with yellow flight numbers (colours only; no airline marks)
 $av-row-1: #0b2470;
 $av-row-2: #020b2e;
@@ -19,7 +19,8 @@ $av-yellow: #ffad00;
 // (silver to steel blue band, so the white title keeps its usual shadow)
 #metar-html,
 #departures-html,
-#cancellations-html {
+#cancellations-html,
+#work-schedule-html {
 	background-image: url(../images/BackGround1_1_aviation.png);
 
 	.header .title {
@@ -29,7 +30,8 @@ $av-yellow: #ffad00;
 
 .wide.metar #container,
 .wide.departures #container,
-.wide.cancellations #container {
+.wide.cancellations #container,
+.wide.work-schedule #container {
 	background: url(../images/BackGround1_1_wide_aviation.png);
 }
 
@@ -44,7 +46,8 @@ $av-yellow: #ffad00;
 }
 
 .weather-display .main.departures.main,
-.weather-display .main.cancellations.main {
+.weather-display .main.cancellations.main,
+.weather-display .main.work-schedule.main {
 	.column-headers {
 		background-color: $av-column-header;
 
@@ -54,10 +57,12 @@ $av-yellow: #ffad00;
 	}
 
 	.departures-lines,
-	.cancellations-lines {
+	.cancellations-lines,
+	.schedule-lines {
 		@include av-rows-background;
 
-		.flight {
+		.flight,
+		.schedule-row .day {
 			color: $av-yellow;
 		}
 	}

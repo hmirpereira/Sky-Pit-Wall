@@ -1,0 +1,77 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+// 310px in total: headers 30 + rows 280 (7 x 40)
+.weather-display .main.work-schedule {
+	&.main {
+		overflow: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			height: 30px;
+			position: relative;
+
+			div {
+				position: absolute;
+				top: -4px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+			}
+		}
+
+		.day {
+			left: 40px;
+		}
+
+		.shift {
+			left: 210px;
+		}
+
+		.start {
+			left: 390px;
+		}
+
+		.end {
+			left: 510px;
+		}
+
+		.schedule-lines {
+			height: 280px;
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.schedule-row {
+				position: relative;
+				height: 40px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: white;
+				@include u.text-shadow();
+
+				>div {
+					position: absolute;
+					top: 4px;
+					white-space: pre;
+				}
+
+				.day {
+					color: c.$title-color;
+				}
+
+				&.off .shift {
+					color: #a9c4ef;
+				}
+
+				// today stands out
+				&.today {
+					background-color: rgba(255, 255, 255, 0.12);
+				}
+			}
+		}
+	}
+}
