@@ -1,17 +1,41 @@
 <%- include('header.ejs', {titleDual:{ top: 'Work Schedule' , bottom: 'Next 7 Days' }, hasTime: true, noaaLogo: false}) %>
 	<div class="main has-scroll work-schedule">
-		<div class="column-headers">
-			<div class="day">DAY</div>
-			<div class="shift">SHIFT</div>
-			<div class="start">START</div>
-			<div class="end">END</div>
+		<div class="schedule-page week">
+			<div class="column-headers">
+				<div class="day">DAY</div>
+				<div class="shift">SHIFT</div>
+				<div class="start">START</div>
+				<div class="end">END</div>
+				<div class="wx">WX</div>
+			</div>
+			<div class="schedule-lines">
+				<div class="schedule-row template">
+					<div class="day"></div>
+					<div class="shift"></div>
+					<div class="start"></div>
+					<div class="end"></div>
+					<div class="wx"><img alt="" /></div>
+					<div class="temp"></div>
+				</div>
+			</div>
 		</div>
-		<div class="schedule-lines">
-			<div class="schedule-row template">
-				<div class="day"></div>
-				<div class="shift"></div>
-				<div class="start"></div>
-				<div class="end"></div>
+		<div class="schedule-page next">
+			<div class="when"></div>
+			<div class="hours"></div>
+			<div class="countdown"></div>
+			<div class="weather-pair">
+				<div class="start">
+					<div class="label"></div>
+					<div class="icon"><img alt="" /></div>
+					<div class="cond"></div>
+					<div class="details"></div>
+				</div>
+				<div class="end">
+					<div class="label"></div>
+					<div class="icon"><img alt="" /></div>
+					<div class="cond"></div>
+					<div class="details"></div>
+				</div>
 			</div>
 		</div>
 	</div>

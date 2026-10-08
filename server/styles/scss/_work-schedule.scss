@@ -21,20 +21,26 @@
 			}
 		}
 
-		.day {
-			left: 40px;
-		}
+		.schedule-page.week {
+			.day {
+				left: 30px;
+			}
 
-		.shift {
-			left: 210px;
-		}
+			.shift {
+				left: 170px;
+			}
 
-		.start {
-			left: 390px;
-		}
+			.start {
+				left: 315px;
+			}
 
-		.end {
-			left: 510px;
+			.end {
+				left: 425px;
+			}
+
+			.wx {
+				left: 526px;
+			}
 		}
 
 		.schedule-lines {
@@ -63,6 +69,19 @@
 					color: c.$title-color;
 				}
 
+				// weather at the start of the shift: icon and temperature
+				.wx img {
+					position: absolute;
+					top: 2px;
+					height: 34px;
+				}
+
+				.temp {
+					left: 588px;
+					font-size: 20pt;
+					top: 7px;
+				}
+
 				&.off .shift {
 					color: #a9c4ef;
 				}
@@ -70,6 +89,69 @@
 				// today stands out
 				&.today {
 					background-color: rgba(255, 255, 255, 0.12);
+				}
+			}
+		}
+	
+		// page 2: next shift
+		.schedule-page.next {
+			position: relative;
+			height: 310px;
+			font-family: 'Star4000';
+			color: white;
+			text-align: center;
+			@include u.text-shadow();
+
+			.when {
+				padding-top: 16px;
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: c.$title-color;
+			}
+
+			.hours {
+				font-family: 'Star4000 Large';
+				font-size: 28pt;
+				margin-top: 4px;
+			}
+
+			.countdown {
+				font-size: 20pt;
+				margin-top: 6px;
+				color: #a9c4ef;
+			}
+
+			// the box drawn in the background is 512px wide (64px margins): two halves inside it
+			.weather-pair {
+				display: flex;
+				margin: 10px 64px 0;
+
+				>div {
+					width: 50%;
+					overflow: hidden;
+				}
+
+				.label {
+					font-family: 'Star4000 Small';
+					font-size: 20pt;
+					color: c.$title-color;
+				}
+
+				.icon img {
+					height: 56px;
+				}
+
+				.cond {
+					font-size: 16pt;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+
+				// "15°C  Rain 0%  Wind 6 km/h" in a smaller font, so it stays inside its half of the box
+				.details {
+					font-size: 11pt;
+					white-space: pre;
 				}
 			}
 		}
