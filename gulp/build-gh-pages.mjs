@@ -50,6 +50,7 @@ const mjsSources = [
 	'server/scripts/modules/departures.mjs',
 	'server/scripts/modules/cancellations.mjs',
 	'server/scripts/modules/workschedule.mjs',
+	'server/scripts/modules/f1lastrace.mjs',
 	'server/scripts/modules/f1standings.mjs',
 	'server/scripts/modules/f1nextrace.mjs',
 	'server/scripts/modules/progress.mjs',

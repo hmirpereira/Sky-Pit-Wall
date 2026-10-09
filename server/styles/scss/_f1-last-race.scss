@@ -1,0 +1,112 @@
+@use 'shared/_utils'as u;
+@use 'f1-theme'as f1;
+
+// 310px: title 44 + podium 220 + fastest lap 46
+.weather-display .main.f1-last-race {
+	&.main {
+		overflow: hidden;
+		@include f1.f1-rows-background;
+		color: white;
+		font-family: 'Star4000';
+		@include u.text-shadow();
+
+		.race-title {
+			position: relative;
+			height: 44px;
+			padding: 6px 20px 0;
+			white-space: nowrap;
+
+			.name {
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: f1.$f1-accent;
+			}
+
+			.flag {
+				width: 36px;
+				height: 24px;
+				margin-left: 12px;
+				vertical-align: 2px;
+				image-rendering: pixelated;
+				outline: 2px solid black;
+			}
+
+			.date {
+				position: absolute;
+				right: 20px;
+				top: 10px;
+				font-size: 20pt;
+			}
+		}
+
+		// three steps standing on the same floor, P1 the tallest
+		.podium {
+			display: flex;
+			justify-content: center;
+			align-items: flex-end;
+			gap: 8px;
+			height: 220px;
+
+			.step {
+				width: 190px;
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				.team {
+					width: 40px;
+					height: 40px;
+					object-fit: contain;
+					margin-bottom: 10px;
+				}
+
+				.driver {
+					font-family: 'Star4000 Large';
+					font-size: 20pt;
+					white-space: nowrap;
+					line-height: 30px;
+				}
+
+				.time {
+					font-size: 14pt;
+					color: f1.$f1-accent;
+					line-height: 22px;
+					margin-bottom: 4px;
+				}
+
+				.block {
+					width: 100%;
+					font-family: 'Star4000 Large';
+					font-size: 28pt;
+					line-height: 1;
+					padding-top: 6px;
+					background: linear-gradient(#5a0b0b, #2a0405);
+					border: 2px solid f1.$f1-red;
+					border-bottom: none;
+				}
+			}
+
+			.p1 .block {
+				height: 80px;
+				background: linear-gradient(#8a1010, #3a0607);
+			}
+
+			.p2 .block {
+				height: 56px;
+			}
+
+			.p3 .block {
+				height: 40px;
+			}
+		}
+
+		.fastest {
+			height: 46px;
+			line-height: 46px;
+			text-align: center;
+			font-size: 18pt;
+			background: f1.$f1-column-header;
+		}
+	}
+}

@@ -1,0 +1,29 @@
+<%- include('header.ejs', {titleDual:{ top: 'F1 Last Race' , bottom: 'Round' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll f1-last-race">
+		<div class="race-title">
+			<span class="name"></span><img class="flag" alt="" />
+			<span class="date"></span>
+		</div>
+		<div class="podium">
+			<div class="step p2">
+				<img class="team" alt="" />
+				<div class="driver"></div>
+				<div class="time"></div>
+				<div class="block">2</div>
+			</div>
+			<div class="step p1">
+				<img class="team" alt="" />
+				<div class="driver"></div>
+				<div class="time"></div>
+				<div class="block">1</div>
+			</div>
+			<div class="step p3">
+				<img class="team" alt="" />
+				<div class="driver"></div>
+				<div class="time"></div>
+				<div class="block">3</div>
+			</div>
+		</div>
+		<div class="fastest"></div>
+	</div>
+	<%- include('scroll.ejs') %>
