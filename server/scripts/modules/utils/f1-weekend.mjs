@@ -5,7 +5,7 @@
 //   after qualifying        -> race grid      (until the race starts)
 //   after the race          -> race result    (until the next weekend's first session)
 // The season schedule comes from Jolpica F1 once a day.
-// Results are asked for shortly after each session and then once an hour until they appear,
+// Results are asked for shortly after each session and then every 20 minutes until they appear,
 // and once more at the next F1 update time (22:00) to catch penalties given after the session.
 import { json } from './fetch.mjs';
 import { readCache, writeCache, isFresh } from './f1-update.mjs';
@@ -13,7 +13,7 @@ import { DateTime } from '../../vendor/auto/luxon.mjs';
 
 const SCHEDULE_URL = 'https://api.jolpi.ca/ergast/f1/current/races/?limit=40';
 const SCHEDULE_KEY = 'f1-schedule-cache';
-const RETRY_MINUTES = 60;
+const RETRY_MINUTES = 20;
 
 // how long after a session starts its result is worth asking for
 const AFTER = {

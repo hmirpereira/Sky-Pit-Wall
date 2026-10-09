@@ -14,10 +14,11 @@ import { getPhase, getSessionResult } from './utils/f1-weekend.mjs';
 
 const JOLPICA = 'https://api.jolpi.ca';
 const OPENF1 = 'https://api.openf1.org/v1';
-const CACHE_KEY = 'f1-grid-cache-v2';
+// v3: with qualifying lap times
+const CACHE_KEY = 'f1-grid-cache-v3';
 const LOCAL_TZ = 'Europe/Lisbon';
 // scrolling: one step = one pixel per baseDelay (20 ms)
-const ROW_HEIGHT = 54; // keep in sync with _f1-grid.scss
+const ROW_HEIGHT = 70; // keep in sync with _f1-grid.scss
 const VISIBLE_HEIGHT = 266;
 const HOLD = 150; // steps (3 s) before scrolling and at the end
 
@@ -45,6 +46,21 @@ const TEAM_NAMES = {
 const stripAccents = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const shortRaceName = (name) => name.replace('Grand Prix', 'GP');
 
+// qualifying times: "1:31.156" <-> seconds
+const toSeconds = (text) => {
+	const m = String(text ?? '').match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);
+	return m ? Number(m[1] ?? 0) * 60 + Number(m[2]) : null;
+};
+const lapText = (seconds) => `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(3).padStart(6, '0')}`;
+// pole: its lap; the others: gap to pole ("+0.232"). The time is the one from the last part
+// of qualifying each driver reached; a driver who set no time there shows "No time"
+// (an earlier, slower part would give a misleading gap)
+const timeText = (seconds, pole, index) => {
+	if (pole === null) return '';
+	if (seconds === null) return 'No time';
+	return index === 0 ? lapText(seconds) : `+${(seconds - pole).toFixed(3)}`;
+};
+
 // car number -> constructorId, from the latest race
 const teamsByNumber = async () => {
 	const results = (await json(`${JOLPICA}/ergast/f1/current/last/results/`).catch(() => null))?.MRData?.RaceTable?.Races?.[0]?.Results ?? [];
@@ -55,6 +71,7 @@ const withTeams = async (rows) => {
 	return rows.map((r) => ({
 		position: String(r.position),
 		name: r.name,
+		time: r.time ?? null,
 		team: teams[Number(r.number)] ?? TEAM_NAMES[String(r.teamName ?? '').toLowerCase()] ?? '',
 	}));
 };
@@ -67,7 +84,7 @@ const alphaResults = async (season, round, code) => {
 	const results = (await json(`${JOLPICA}/f1/alpha/results/${id}/${code}/`))?.data?.results ?? [];
 	if (results.length < 2) return null;
 	return withTeams(results.map((r) => ({
-		position: r.position, name: r.driver?.family_name, number: r.car_number ?? r.driver?.permanent_car_number, teamName: r.team?.name,
+		position: r.position, name: r.driver?.family_name, number: r.car_number ?? r.driver?.permanent_car_number, teamName: r.team?.name, time: toSeconds(Object.values(r.components ?? {}).at(-1)?.time ?? r.time),
 	})));
 };
 
@@ -82,7 +99,7 @@ const openf1Grid = async (season, sessionName, start) => {
 	if (!Array.isArray(grid) || grid.length < 2) return null;
 	const byNumber = Object.fromEntries((Array.isArray(drivers) ? drivers : []).map((d) => [d.driver_number, d]));
 	return withTeams(grid.sort((a, b) => a.position - b.position).map((g) => ({
-		position: g.position, name: byNumber[g.driver_number]?.last_name ?? `#${g.driver_number}`, number: g.driver_number, teamName: byNumber[g.driver_number]?.team_name,
+		position: g.position, name: byNumber[g.driver_number]?.last_name ?? `#${g.driver_number}`, number: g.driver_number, teamName: byNumber[g.driver_number]?.team_name, time: g.lap_duration ?? null,
 	})));
 };
 
@@ -91,7 +108,10 @@ const ergastQualifying = async (season, round) => {
 	const race = (await json(`${JOLPICA}/ergast/f1/${season}/${round}/qualifying/`))?.MRData?.RaceTable?.Races?.[0];
 	const results = race?.QualifyingResults ?? [];
 	if (results.length < 2) return null;
-	return results.map((r) => ({ position: r.position, name: r.Driver?.familyName ?? '', team: r.Constructor?.constructorId ?? '' }));
+	// official time: from the last part of qualifying each driver took part in
+	return results.map((r) => ({
+		position: r.position, name: r.Driver?.familyName ?? '', team: r.Constructor?.constructorId ?? '', time: toSeconds(['Q3', 'Q2', 'Q1'].map((q) => r[q]).find((t) => t !== undefined)),
+	}));
 };
 
 // first source that answers with a grid
@@ -158,10 +178,12 @@ class F1Grid extends WeatherDisplay {
 		flag.src = `images/flags/${stripAccents(grid.country).toLowerCase().replace(/\s+/g, '-')}.png`;
 		title.querySelector('.date').textContent = DateTime.fromISO(grid.start).setZone(LOCAL_TZ).toFormat('ccc HH:mm');
 
+		const pole = grid.slots[0]?.time ?? null;
 		const slots = grid.slots.map((driver, index) => {
 			const slot = this.fillTemplate('grid-slot', {
 				position: driver.position,
 				driver: stripAccents(driver.name),
+				lap: timeText(driver.time ?? null, pole, index),
 			});
 			const row = Math.floor(index / 2);
 			const right = index % 2 === 1;

@@ -76,7 +76,7 @@
 			.position {
 				position: absolute;
 				left: 0;
-				top: 4px;
+				top: 14px;
 				width: 36px;
 				text-align: right;
 				font-family: 'Star4000 Large';
@@ -90,7 +90,7 @@
 				left: 46px;
 				top: 0;
 				width: 220px;
-				height: 38px;
+				height: 60px;
 				border-top: 3px solid white;
 
 				&::before,
@@ -113,7 +113,7 @@
 				.team {
 					position: absolute;
 					left: 12px;
-					top: 5px;
+					top: 15px;
 					width: 30px;
 					height: 30px;
 					object-fit: contain;
@@ -122,9 +122,19 @@
 				.driver {
 					position: absolute;
 					left: 54px;
-					top: 3px;
+					top: 10px;
 					font-family: 'Star4000 Large';
 					font-size: 20pt;
+					white-space: nowrap;
+				}
+
+				// pole lap, then the gap to pole
+				.lap {
+					position: absolute;
+					left: 54px;
+					top: 40px;
+					font-size: 12pt;
+					color: f1.$f1-accent;
 					white-space: nowrap;
 				}
 			}
