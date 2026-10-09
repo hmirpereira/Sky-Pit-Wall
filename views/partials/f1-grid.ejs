@@ -1,0 +1,19 @@
+<%- include('header.ejs', {titleDual:{ top: 'F1 Race Grid' , bottom: 'Round' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll f1-grid">
+		<div class="race-title">
+			<span class="name"></span><img class="flag" alt="" />
+			<span class="date"></span>
+		</div>
+		<div class="grid-area">
+			<div class="grid-lines">
+				<div class="grid-slot template">
+					<div class="position"></div>
+					<div class="box">
+						<img class="team" alt="" />
+						<div class="driver"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

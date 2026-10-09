@@ -1,0 +1,133 @@
+@use 'shared/_utils'as u;
+@use 'f1-theme'as f1;
+
+// 310px: title 44 + grid 266 (scrolls)
+.weather-display .main.f1-grid {
+	&.main {
+		overflow: hidden;
+		@include f1.f1-rows-background;
+		color: white;
+		font-family: 'Star4000';
+		@include u.text-shadow();
+
+		.race-title {
+			position: relative;
+			height: 44px;
+			padding: 6px 20px 0;
+			white-space: nowrap;
+
+			.name {
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				color: f1.$f1-accent;
+			}
+
+			.flag {
+				width: 36px;
+				height: 24px;
+				margin-left: 12px;
+				vertical-align: 2px;
+				image-rendering: pixelated;
+				outline: 2px solid black;
+			}
+
+			.date {
+				position: absolute;
+				right: 20px;
+				top: 10px;
+				font-size: 20pt;
+			}
+		}
+
+		// scrollTop is set in f1grid.mjs
+		.grid-area {
+			height: 266px;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.grid-lines {
+			position: relative;
+
+			// centre line of the track, between the two columns
+			&::before {
+				content: '';
+				position: absolute;
+				left: 318px;
+				top: 0;
+				bottom: 0;
+				border-left: 2px dashed rgba(255, 255, 255, 0.25);
+			}
+		}
+
+		.grid-slot {
+			position: absolute;
+			width: 270px;
+			height: 40px;
+
+			&.left {
+				left: 34px;
+			}
+
+			&.right {
+				left: 334px;
+			}
+
+			.position {
+				position: absolute;
+				left: 0;
+				top: 4px;
+				width: 36px;
+				text-align: right;
+				font-family: 'Star4000 Large';
+				font-size: 22pt;
+				color: f1.$f1-accent;
+			}
+
+			// grid box: white line in front of the car, short lines at the sides
+			.box {
+				position: absolute;
+				left: 46px;
+				top: 0;
+				width: 220px;
+				height: 38px;
+				border-top: 3px solid white;
+
+				&::before,
+				&::after {
+					content: '';
+					position: absolute;
+					top: -3px;
+					height: 16px;
+					border-left: 3px solid white;
+				}
+
+				&::before {
+					left: 0;
+				}
+
+				&::after {
+					right: 0;
+				}
+
+				.team {
+					position: absolute;
+					left: 12px;
+					top: 5px;
+					width: 30px;
+					height: 30px;
+					object-fit: contain;
+				}
+
+				.driver {
+					position: absolute;
+					left: 54px;
+					top: 3px;
+					font-family: 'Star4000 Large';
+					font-size: 20pt;
+					white-space: nowrap;
+				}
+			}
+		}
+	}
+}

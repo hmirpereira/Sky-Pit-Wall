@@ -18,6 +18,7 @@ $f1-text: white;
 // frame and header band: recoloured copies of the WeatherStar backgrounds
 #f1-standings-html,
 #f1-last-race-html,
+#f1-grid-html,
 #f1-next-race-html {
 	background-image: url(../images/BackGround1_1_f1.png);
 
@@ -28,6 +29,7 @@ $f1-text: white;
 
 .wide.f1-standings #container,
 .wide.f1-last-race #container,
+.wide.f1-grid #container,
 .wide.f1-next-race #container {
 	background: url(../images/BackGround1_1_wide_f1.png);
 }
