@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Sky Pit Wall</title>
-  <meta name="description" content="Weather, Porto departures and a pit wall attitude, in the style of the WeatherStar 4000. Based on WeatherStar 4000+ International." />
+  <meta name="description" content="Weather, airport departures and a pit wall attitude, in the style of the WeatherStar 4000. Based on WeatherStar 4000+ International." />
   <meta name="keywords" content="Sky Pit Wall, WeatherStar 4000+" />
   <meta name="author" content="Michael Wood" />
   <meta name="application-name" content="Sky Pit Wall" />
@@ -14,7 +14,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="images/Logo192.png" />
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
   
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -74,8 +73,11 @@
 <body>
 
 
+  <header class="site-header">
+    <div class="site-title">Sky Pit Wall</div>
+    <div class="site-tagline">Weather, airport departures and Formula 1, WeatherStar style</div>
   <div id="divQuery">
-		<input id="txtAddress" type="text" value="" placeholder="Zip or City, State" />
+		<input id="txtAddress" type="text" value="" placeholder="City or place" />
 		<div class="buttons">
 			<button id="btnGetGps" type="button" title="Get GPS Location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light"/>
 				<img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark"/>
@@ -84,6 +86,9 @@
 			<button id="btnClearQuery" type="reset">Reset</button>
 		</div>
   </div>
+    <!-- music player: above the screen, so it stays in place when the page below changes size -->
+    <div class="site-music"><div id="webamp-app"></div></div>
+  </header>
   <div id="version" style="display:none">
     <%- version %>
   </div>
@@ -187,79 +192,82 @@
     </div>
   </div>
 
-  <br />
-  <!-- <div class="experimental-features">
-    You've enabled experimental features, you may encounter bugs or weird behavior!
-  </div> -->
-
-  <div class="info">
-    <a class="github-button" href="https://github.com/mwood77/ws4kp-international" data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star mwood77/ws4kp-international on GitHub">Star</a>
-    <a class="github-button" href="https://github.com/mwood77/ws4kp-international/fork" data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;" data-icon="octicon-repo-forked" data-size="large" data-show-count="true" aria-label="Fork mwood77/ws4kp-international on GitHub">Fork</a>
-    <!-- <a class="github-button" href="https://github.com/mwood77" data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;" data-size="large" data-show-count="true" aria-label="Follow @mwood77 on GitHub">Follow @mwood77</a> -->
-    <a class="github-button" href="https://github.com/mwood77/ws4kp-international/issues" data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;" data-icon="octicon-issue-opened" data-size="large" data-show-count="true" aria-label="Issue mwood77/ws4kp-international on GitHub">Issue</a>
-    <a class="github-button" href="https://github.com/sponsors/mwood77" data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;" data-icon="octicon-heart" data-size="large" aria-label="Sponsor @mwood77 on GitHub">Sponsor</a>
-  </div>
-
-  <div style="height: 50px; width:400px" id="webamp-app"></div>
-
-  <div class="info">
-    Sky Pit Wall is based on WeatherStar 4000+ International, a simulation of The Weather Channel's (TWC) WeatherStar 4000+
-    <br />
-    <br />
-    Background info, linking, Q&A, other uses, and questions?<br />
-    - <a href="https://github.com/mwood77/ws4kp-international#weatherstar-4000-international" target="_blank">Check the readme</a>
-  </div>
-
-  <div class="info">
-    <br />
-    Resources & data provided by:<br />
-    <div style="display: flex; gap: 2em; flex-wrap: wrap;">
-      <div>
-        - <a href="https://open-meteo.com/en/docs" target="_blank">Open Meteo</a> <br />
-        - <a href="https://archive.org/details/weatherscancompletecollection" target="_blank">Internet Archive</a><br />
-        - <a href="https://twcclassics.com/" target="_blank">TWC Classics</a><br />
-        - <a href="https://leafletjs.com/" target="_blank">Leaflet</a><br />
+  <div class="page-panels">
+    <section class="panel panel-displays">
+      <div class="heading">Screens</div>
+      <div class="panel-note">In rotation order. Screens marked <span class="pi-only">Pi</span> only work on the Raspberry Pi; anywhere else they are skipped.</div>
+      <div id='enabledDisplays'>
       </div>
-      <div>
-        - <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a><br />
-        - <a href="https://www.esri.com/" target="_blank">ESRI</a><br />
-        - <a href="https://www.rainviewer.com/api.html" target="_blank">Rainviewer</a><br />
+    </section>
+
+    <section class="panel panel-settings">
+      <div class="heading">Settings</div>
+      <div id='settings'>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <div class='heading'>Selected displays</div>
-  <div id='enabledDisplays'>
+    <section class="panel panel-status">
+      <div class="heading">Forecast</div>
+      <div id="divInfo">
+        Location: <span id="spanCity"></span> <span id="spanState"></span><br />
+      </div>
+      <div id="divRefresh">
+        Last update: <span id="spanLastRefresh">(None)</span><br />
+        <input id="chkAutoRefresh" name="chkAutoRefresh" type="checkbox" /><label id="lblRefreshCountDown" for="chkAutoRefresh">Auto refresh: <span id="spanRefreshCountDown">--:--</span></label>
+      </div>
+      <div class="heading">TV</div>
+      <div class='info'>
+        <a href='' id='tv-link'>Copy TV command</a> <span id="tv-link-copied">Copied!</span>
+        <div class="panel-note">The choices on this page, plus kiosk, widescreen, scan lines and no Winamp. Paste it on the Raspberry Pi: it updates the TV's address and restarts the browser.</div>
+        <textarea id="tv-link-command" rows="4" readonly></textarea>
+      </div>
+      <div class="heading">Sharing</div>
+      <div class='info'>
+        <a href='' id='share-link'>Copy permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
+        <div id="share-link-instructions">
+          Copy this long URL:
+          <input type='text' id="share-link-url">
+        </div>
+      </div>
+      <!-- the Personal Weather Station screen is not used; its fields stay for the script -->
+      <div class="unused-pws">
+        <span id="customSpanStationId"></span><span id="customSpanLastRefresh"></span>
+      </div>
+    </section>
 
-  </div>
-
-	<div class='heading'>Settings</div>
-	<div id='settings'>
-	</div>
-
-	<div class='heading'>Sharing</div>
-	<div class='info'>
-		<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
-		<div id="share-link-instructions">
-			Copy this long URL:
-			<input type='text' id="share-link-url"></div>
-		</div>
-	</div>
-
-	<div class='heading'>Forecast Information</div>
-  <div id="divInfo">
-    Location: <span id="spanCity"></span> <span id="spanState"></span><br />
-  </div>
-
-  <div id="divRefresh">
-    Last Update: <span id="spanLastRefresh">(None)</span><br />
-    <input id="chkAutoRefresh" name="chkAutoRefresh" type="checkbox" /><label id="lblRefreshCountDown" for="chkAutoRefresh">Auto Refresh: <span id="spanRefreshCountDown">--:--</span></label>
-  </div>
-
-  <div class='heading'>Personal Weather Station Information</div>
-  <div id="divInfo">
-    Station Id: <span id="customSpanStationId"></span><br />
-    Last Update: <span id="customSpanLastRefresh">(None)</span><br />
+    <section class="panel panel-about">
+      <div class="heading">About</div>
+      <p>Sky Pit Wall is a personal fork of <a href="https://github.com/mwood77/ws4kp-international" target="_blank">WeatherStar 4000+ International</a> by @mwood77, itself based on <a href="https://github.com/netbymatt/ws4kp" target="_blank">ws4kp</a> by @netbymatt: a simulation of The Weather Channel's WeatherStar 4000. Not affiliated with The Weather Channel, Formula 1, the FIA, the Lufthansa Group or any team or airline.</p>
+      <p><a href="https://github.com/hmirpereira/Sky-Pit-Wall" target="_blank">Source code and README</a></p>
+      <div class="credits">
+        <div>
+          <div class="credits-title">Weather</div>
+          <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a>
+          <a href="https://www.ipma.pt/" target="_blank">IPMA</a>
+          <a href="https://www.rainviewer.com/api.html" target="_blank">RainViewer</a>
+          <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>
+          <a href="https://www.esri.com/" target="_blank">ESRI</a>
+          <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
+        </div>
+        <div>
+          <div class="credits-title">Aviation</div>
+          <a href="https://metar.vatsim.net/" target="_blank">VATSIM METAR</a>
+          <a href="https://aviationweather.gov/" target="_blank">aviationweather.gov</a>
+          <a href="https://aerodatabox.com/" target="_blank">AeroDataBox</a>
+        </div>
+        <div>
+          <div class="credits-title">Formula 1</div>
+          <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1</a>
+          <a href="https://openf1.org/" target="_blank">OpenF1</a>
+          <a href="https://github.com/bacinger/f1-circuits" target="_blank">f1-circuits</a>
+        </div>
+        <div>
+          <div class="credits-title">Look and sound</div>
+          <a href="https://twcclassics.com/" target="_blank">TWC Classics</a>
+          <a href="https://archive.org/details/weatherscancompletecollection" target="_blank">Internet Archive</a>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script type="module">

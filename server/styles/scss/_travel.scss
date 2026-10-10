@@ -45,7 +45,8 @@
 		}
 
 		.travel-lines {
-			min-height: 338px;
+			// 289px visible: 10 + 5 x 55 fits five cities without scrolling
+			min-height: 289px;
 			padding-top: 10px;
 
 			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
@@ -57,7 +58,7 @@
 			.travel-row {
 				font-family: 'Star4000 Large';
 				font-size: 24pt;
-				height: 72px;
+				height: 55px;
 				color: c.$title-color;
 				@include u.text-shadow();
 				position: relative;

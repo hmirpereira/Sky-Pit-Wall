@@ -26,6 +26,10 @@ class Setting {
 			urlState = parseFloat(urlValue);
 			this.myValue = urlState;
 		}
+		if (type === 'text' && urlValue !== undefined) {
+			urlState = String(urlValue).trim();
+			this.myValue = urlState;
+		}
 
 		// get existing value if present
 		const storedValue = urlState ?? this.getFromLocalStorage();
@@ -37,6 +41,9 @@ class Setting {
 		switch (type) {
 			case 'select':
 				this.selectChange({ target: { value: this.myValue } });
+				break;
+			case 'text':
+				this.textChange({ target: { value: this.myValue } });
 				break;
 			case 'checkbox':
 			default:
@@ -98,6 +105,32 @@ class Setting {
 		return label;
 	}
 
+	// free text (for example an airport code): saved when the field loses focus or Enter is pressed
+	generateText() {
+		const label = document.createElement('label');
+		label.for = `settings-${this.shortName}-text`;
+		label.id = `settings-${this.shortName}-label`;
+		const span = document.createElement('span');
+		span.innerHTML = `${this.name} `;
+		const input = document.createElement('input');
+		input.type = 'text';
+		input.id = `settings-${this.shortName}-text`;
+		input.name = `settings-${this.shortName}-text`;
+		input.value = this.myValue ?? '';
+		if (this.values?.placeholder) input.placeholder = this.values.placeholder;
+		if (this.values?.maxLength) input.maxLength = this.values.maxLength;
+		input.addEventListener('change', (e) => this.textChange(e));
+		label.append(span, input);
+		this.element = label;
+		return label;
+	}
+
+	textChange(e) {
+		this.myValue = String(e.target.value ?? '').trim();
+		this.storeToLocalStorage(this.myValue);
+		this.changeAction(this.myValue);
+	}
+
 	checkboxChange(e) {
 		// update the state
 		this.myValue = e.target.checked;
@@ -135,6 +168,7 @@ class Setting {
 						case 'checkbox':
 							return storedValue;
 						case 'select':
+						case 'text':
 							return storedValue;
 						default:
 							return null;
@@ -158,6 +192,9 @@ class Setting {
 			case 'select':
 				this.selectHighlight(newValue);
 				break;
+			case 'text':
+				this.element.querySelector('input').value = newValue;
+				break;
 			case 'checkbox':
 			default:
 				this.element.checked = newValue;
@@ -179,6 +216,8 @@ class Setting {
 		switch (this.type) {
 			case 'select':
 				return this.generateSelect();
+			case 'text':
+				return this.generateText();
 			case 'checkbox':
 			default:
 				return this.generateCheckbox();

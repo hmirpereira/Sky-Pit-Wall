@@ -9,6 +9,7 @@ const init = () => {
 	// add action to existing link
 	const shareLink = document.querySelector('#share-link');
 	shareLink.addEventListener('click', createLink);
+	document.querySelector('#tv-link')?.addEventListener('click', createTvLink);
 
 	// if navigator.clipboard does not exist, change text
 	if (!navigator?.clipboard) {
@@ -16,9 +17,56 @@ const init = () => {
 	}
 };
 
+// settings the TV always needs, whatever is chosen on this page
+const TV_SETTINGS = {
+	'settings-kiosk-checkbox': true,
+	'settings-wide-checkbox': true,
+	'settings-scanLines-checkbox': true,
+	'settings-hideWebamp-checkbox': true,
+};
+
 const createLink = async (e) => {
 	// cancel default event (click on hyperlink)
 	e.preventDefault();
+	const url = buildUrl();
+
+	// send to proper function based on availability of clipboard
+	if (navigator?.clipboard) {
+		copyToClipboard(url);
+	} else {
+		writeLinkToPage(url);
+	}
+};
+
+// the same address with the TV settings, ready for "skypitwall-tv url" on the Pi
+const createTvLink = async (e) => {
+	e.preventDefault();
+	const box = document.querySelector('#tv-link-command');
+	// the TV needs a location: without one it would stop at "Enter your location"
+	if (!localStorage.getItem('latLon') && !parseQueryString().latLon) {
+		box.value = 'Choose a location first (search box at the top), then copy the TV command again.';
+		box.style.display = 'block';
+		return;
+	}
+	const url = buildUrl(TV_SETTINGS);
+	const command = `skypitwall-tv url '${url.toString()}'`;
+	box.value = command;
+	box.style.display = 'block';
+	box.focus();
+	box.select();
+	if (navigator?.clipboard) {
+		try {
+			await navigator.clipboard.writeText(command);
+			const confirmSpan = document.querySelector('#tv-link-copied');
+			confirmSpan.style.display = 'inline';
+			setTimeout(() => { confirmSpan.style.display = 'none'; }, 5000);
+		} catch (error) {
+			console.error(error);
+		}
+	}
+};
+
+const buildUrl = (overrides = {}) => {
 	// get all checkboxes on page
 	const checkboxes = document.querySelectorAll('input[type=checkbox]');
 
@@ -39,20 +87,21 @@ const createLink = async (e) => {
 		}
 	});
 
-	// add the location string
-	queryStringElements.latLonQuery = localStorage.getItem('latLonQuery');
-	queryStringElements.latLon = localStorage.getItem('latLon');
+	// text settings (airport code and name)
+	document.querySelectorAll('input[type=text][id^="settings-"]').forEach((elem) => {
+		if (elem.value.trim()) queryStringElements[elem.id] = elem.value.trim();
+	});
 
+	// add the location string (left out when no location has been chosen yet)
+	const latLonQuery = localStorage.getItem('latLonQuery') ?? parseQueryString().latLonQuery;
+	const latLon = localStorage.getItem('latLon') ?? parseQueryString().latLon;
+	if (latLonQuery) queryStringElements.latLonQuery = latLonQuery;
+	if (latLon) queryStringElements.latLon = latLon;
+
+	Object.assign(queryStringElements, overrides);
 	const queryString = (new URLSearchParams(queryStringElements)).toString();
 
-	const url = new URL(`?${queryString}`, document.location.href);
-
-	// send to proper function based on availability of clipboard
-	if (navigator?.clipboard) {
-		copyToClipboard(url);
-	} else {
-		writeLinkToPage(url);
-	}
+	return new URL(`?${queryString}`, document.location.href);
 };
 
 const copyToClipboard = async (url) => {

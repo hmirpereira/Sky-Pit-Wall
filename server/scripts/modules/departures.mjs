@@ -1,4 +1,4 @@
-// next Lufthansa Group departures from Porto (OPO)
+// next Lufthansa Group departures from the local airport (set on the Pi)
 // Flight data comes from AeroDataBox through a small service on the Raspberry Pi
 // (skypitwall-voos), which keeps the API key private and serves the result on the Pi only.
 // Anywhere else the service is not reachable and this screen is skipped.
@@ -6,6 +6,7 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { placeTitle } from './utils/local-place.mjs';
 import ConversionHelpers from './utils/conversionHelpers.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 
@@ -74,6 +75,7 @@ class Departures extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
+		this.elem.querySelector('.header .title.dual .top').innerHTML = placeTitle('Departures');
 
 		const pageIndex = Math.min(Math.max(this.screenIndex, 0), this.pages.length - 1);
 

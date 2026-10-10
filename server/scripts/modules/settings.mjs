@@ -1,5 +1,6 @@
 import Setting from './utils/setting.mjs';
 import btnNavigateRefreshClick from '../index.mjs';
+import { IPMA_AREAS } from './utils/ipma-areas.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -7,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // default speed
 const settings = {
+	// shown first on the page
+	airportIcao: { value: '' },
+	airportName: { value: '' },
+	ipmaArea: { value: 0 },
 	windUnits: { value: 2 },
 	marineWindUnits: { value: 1 },
 	marineWaveHeightUnits: { value: 1 },
@@ -22,6 +27,15 @@ const settings = {
 };
 
 const init = () => {
+	// local airport (Airport METAR, Departures and Cancellations titles) and IPMA warning area (Hazards);
+	// nothing is set by default, so the code has no place in it: the Pi's address sets them
+	settings.airportIcao = new Setting('airportIcao', 'Airport ICAO code', 'text', '', null, true, { placeholder: 'e.g. EDDF', maxLength: 4 });
+	settings.airportName = new Setting('airportName', 'Airport name', 'text', '', null, true, { placeholder: 'e.g. Frankfurt', maxLength: 16 });
+	settings.ipmaArea = new Setting('ipmaArea', 'IPMA warning area', 'select', 0, null, true, [
+		[0, 'none'],
+		...IPMA_AREAS.map(([n, , name]) => [n, name]),
+	]);
+
 	// Customizable measurement units
 	settings.windUnits = new Setting('windUnits', 'Wind Units', 'select', 2, windUnitsChange, true, [
 		[1, 'm/s'],

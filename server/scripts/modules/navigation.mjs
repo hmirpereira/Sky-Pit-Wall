@@ -399,11 +399,15 @@ const resize = () => {
 	const heightZoomPercent = (window.innerHeight) / 480;
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
+	const container = document.querySelector('#container');
 	if (scale < 1.0 || document.fullscreenElement || settings.kiosk) {
-		document.querySelector('#container').style.transform = `scale(${scale})`;
+		container.style.transform = `scale(${scale})`;
 	} else {
-		document.querySelector('#container').style.transform = 'unset';
+		container.style.transform = 'unset';
 	}
+	// on a small page the scaled screen still takes its full height: remove the empty space under it
+	const shrunk = scale < 1.0 && !document.fullscreenElement && !settings.kiosk?.value;
+	container.style.marginBottom = shrunk ? `${-480 * (1 - scale)}px` : '';
 };
 
 // reset all statuses to loading on all displays, used to keep the progress bar accurate during refresh
@@ -419,16 +423,46 @@ const registerDisplay = (display) => {
 	generateCheckboxes();
 };
 
+// screens grouped on the page (in rotation order inside each group); anything not listed is weather
+const DISPLAY_GROUPS = [
+	{ title: 'Weather', ids: null },
+	{ title: 'Aviation', ids: ['metar', 'departures', 'cancellations'] },
+	{ title: 'Personal', ids: ['work-schedule'] },
+	{ title: 'Formula 1', ids: ['f1-last-race', 'f1-grid', 'f1-standings', 'f1-next-race'] },
+];
+// screens that read data served by the Raspberry Pi (skipped anywhere else)
+const PI_ONLY = ['departures', 'cancellations', 'work-schedule'];
+
 const generateCheckboxes = () => {
 	const availableDisplays = document.querySelector('#enabledDisplays');
 
 	if (!availableDisplays) return;
-	// generate checkboxes
-	const checkboxes = displays.map((d) => d.generateCheckbox(d.defaultEnabled)).filter((d) => d);
+	const grouped = new Set(DISPLAY_GROUPS.flatMap((g) => g.ids ?? []));
+	const groups = DISPLAY_GROUPS.map((group) => {
+		const members = displays.filter((d) => d && (group.ids ? group.ids.includes(d.elemId) : !grouped.has(d.elemId)));
+		const checkboxes = members.map((d) => {
+			const label = d.generateCheckbox(d.defaultEnabled);
+			if (label && PI_ONLY.includes(d.elemId) && !label.querySelector('.pi-only')) {
+				const tag = document.createElement('span');
+				tag.className = 'pi-only';
+				tag.textContent = 'Pi';
+				label.append(tag);
+			}
+			return label;
+		}).filter((d) => d);
+		if (!checkboxes.length) return null;
+		const box = document.createElement('div');
+		box.className = 'display-group';
+		const title = document.createElement('div');
+		title.className = 'display-group-title';
+		title.textContent = group.title;
+		box.append(title, ...checkboxes);
+		return box;
+	}).filter((g) => g);
 
 	// write to page
 	availableDisplays.innerHTML = '';
-	availableDisplays.append(...checkboxes);
+	availableDisplays.append(...groups);
 };
 
 // special registration method for progress display

@@ -7,12 +7,7 @@ import decodeMetar from './utils/metar-decoder.mjs';
 import decodeTaf from './utils/taf-decoder.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import ConversionHelpers from './utils/conversionHelpers.mjs';
-
-// airport shown on this screen
-const STATION = {
-	icao: 'LPPR',
-	name: 'Porto Airport',
-};
+import { airport, placeTitle } from './utils/local-place.mjs';
 
 // metar.vatsim.net mirrors real-world METARs and allows browser (CORS) requests without a key
 const METAR_URL = (icao) => `https://metar.vatsim.net/${icao}`;
@@ -33,7 +28,13 @@ class Metar extends WeatherDisplay {
 	async getData(_weatherParameters) {
 		if (!super.getData(_weatherParameters)) return;
 
-		const [metar, taf] = await Promise.all([getMetar(), getTaf()]);
+		// no airport set: nothing to show
+		const { icao } = airport();
+		if (!icao) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+		const [metar, taf] = await Promise.all([getMetar(icao), getTaf(icao)]);
 		if (!metar && !taf) {
 			this.setStatus(STATUS.failed);
 			return;
@@ -75,7 +76,8 @@ class Metar extends WeatherDisplay {
 		// page numbers count METAR and TAF pages separately
 		const same = this.pages.filter((page) => page.kind === kind);
 		const pageText = same.length > 1 ? ` ${same.indexOf(this.pages[pageIndex]) + 1}/${same.length}` : '';
-		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `${STATION.icao} ${kind}${pageText}`;
+		this.elem.querySelector('.header .title.dual .top').innerHTML = placeTitle('Airport');
+		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `${airport().icao} ${kind}${pageText}`;
 
 		this.finishDraw();
 	}
@@ -87,22 +89,23 @@ const ROWS_WITHOUT_RAW = 10;
 // height of each line on TAF pages that are not full
 const ROW_PITCH = 32;
 
-const getMetar = async () => {
+const getMetar = async (icao) => {
 	try {
-		const raw = (await text(METAR_URL(STATION.icao))).trim().split('\n')[0];
+		const raw = (await text(METAR_URL(icao))).trim().split('\n')[0];
 		if (!raw) throw new Error('Empty METAR response');
 		return decodeMetar(raw);
 	} catch (error) {
-		console.error(`Metar: unable to get METAR for ${STATION.icao}`, error);
+		console.error(`Metar: unable to get METAR for ${icao}`, error);
 		return null;
 	}
 };
 
-const getTaf = async () => {
+const getTaf = async (icao) => {
 	try {
 		const data = await json(TAF_URL, { signal: AbortSignal.timeout(5000) });
-		// an old TAF (e.g. the Pi lost its connection) is not shown
+		// an old TAF (e.g. the Pi lost its connection) is not shown, nor one for another airport
 		if (!data?.raw || !data.validTo || new Date(data.validTo) < new Date()) return null;
+		if (data.station && data.station.toUpperCase() !== icao) return null;
 		return decodeTaf(data.raw, data.issued);
 	} catch {
 		// expected away from the Raspberry Pi

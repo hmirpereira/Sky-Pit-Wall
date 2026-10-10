@@ -1,4 +1,4 @@
-// cancelled departures from Porto (OPO), all airlines
+// cancelled departures from the local airport (set on the Pi), all airlines
 // Comes from the same skypitwall-voos service on the Raspberry Pi as the Departures screen. The list is
 // only refreshed when the service calls AeroDataBox for the Lufthansa Group flights (no extra calls),
 // so the footer shows when it was last updated. Anywhere else this screen is skipped.
@@ -6,6 +6,7 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { placeTitle } from './utils/local-place.mjs';
 import ConversionHelpers from './utils/conversionHelpers.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 
@@ -63,6 +64,7 @@ class Cancellations extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
+		this.elem.querySelector('.header .title.dual .top').innerHTML = placeTitle('Departures');
 
 		const pageIndex = Math.min(Math.max(this.screenIndex, 0), this.pages.length - 1);
 		const today = DateTime.now().setZone(AIRPORT_TZ);

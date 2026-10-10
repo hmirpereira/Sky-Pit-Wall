@@ -4,12 +4,12 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { warningArea } from './utils/local-place.mjs';
 
 // NOTE: by the owner's choice, this screen is shown in Portuguese, the language of the IPMA
 // warning texts (the IPMA open data API has no English version of the descriptions).
 
-// IPMA warning area shown on this screen (PTO = Porto district)
-const AREA = { id: 'PTO', name: 'Distrito do Porto' };
+// the IPMA warning area comes from the settings (utils/local-place.mjs)
 const IPMA_WARNINGS_URL = 'https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json';
 
 const LEVELS = { yellow: 1, orange: 2, red: 3 };
@@ -54,6 +54,9 @@ class Hazards extends WeatherDisplay {
 		alert.classList.remove('show');
 
 		try {
+			const AREA = warningArea();
+			if (!AREA) throw new Error('no IPMA warning area set');
+			this.area = AREA;
 			const warnings = await json(IPMA_WARNINGS_URL);
 			const now = nowInPortugal();
 			this.data = warnings
@@ -91,7 +94,7 @@ class Hazards extends WeatherDisplay {
 
 			const line = this.fillTemplate('hazard', {
 				// the Star4000 fonts have no usable accented capitals, so accents are removed (ATÉ -> ATE)
-				'hazard-text': stripAccents(`AVISO ${level}<br/>${warning.awarenessTypeName}<br/>${AREA.name}<br/>${period}${description}`),
+				'hazard-text': stripAccents(`AVISO ${level}<br/>${warning.awarenessTypeName}<br/>${this.area.name}<br/>${period}${description}`),
 			});
 			line.classList.add(`level-${warning.awarenessLevelID}`);
 			return line;
