@@ -21,9 +21,14 @@ const GROUP_ICONS = ['LH', 'LX', 'OS', '4Y', 'SN'];
 // airline logos drawn above the flight number on the radar, by ICAO airline code (the first
 // three letters of the callsign): add the code here and the file as images/overhead-logos/<CODE>.png
 // (drawn at 48 x 16 px, transparent background). Only codes listed here are asked for.
-const RADAR_LOGOS = [];
+const RADAR_LOGOS = ['AUA', 'DLH', 'EZY', 'RYR', 'SWR', 'TAP'];
+// other callsign prefixes flying under the same brand
+const LOGO_ALIASES = { CLH: 'DLH', EJU: 'EZY', EZS: 'EZY' };
 const LOGO_H = 16;
-const airlineCode = (callsign) => /^([A-Z]{3})\d/.exec(callsign ?? '')?.[1] ?? null;
+const airlineCode = (callsign) => {
+	const code = /^([A-Z]{3})\d/.exec(callsign ?? '')?.[1] ?? null;
+	return LOGO_ALIASES[code] ?? code;
+};
 // flight number (LH1176) from the Pi service; aircraft whose callsign does not give it
 // (letters in it, like RYR10UB, or no airline known) show the callsign instead
 const flightText = (ac) => ac.flight ?? ac.callsign;
@@ -355,6 +360,11 @@ class Overhead extends WeatherDisplay {
 		// flight number, and the route under it when known; a logo, when there is one, goes above
 		const free = (x, y, h) => x >= 0 && x + LABEL_W <= 280 && y >= 0 && y + h <= 280
 			&& labels.every(([lx, ly, lw, lh]) => x >= lx + lw || lx >= x + LABEL_W || y >= ly + lh || ly >= y + h);
+		// every arrow is kept clear first, so no label covers another aircraft
+		this.radarAircraft.forEach((ac) => {
+			const p = place(ac.lat, ac.lon);
+			labels.push([p.x - 6, p.y - 10, 12, 20]);
+		});
 		this.radarAircraft.forEach((ac) => {
 			const p = place(ac.lat, ac.lon);
 			const route = routeText(ac);

@@ -15,8 +15,8 @@
 			height: 310px;
 		}
 
-		// page 1: the closest aircraft
-		.closest {
+		// page 1: the closest aircraft (only the page: the radar also marks its closest target)
+		.overhead-page.closest {
 			.where {
 				height: 30px;
 				line-height: 30px;
@@ -164,7 +164,7 @@
 		}
 
 		// page 2: radar and list
-		.radar {
+		.overhead-page.radar {
 			.scope {
 				position: absolute;
 				left: 22px;
@@ -250,6 +250,8 @@
 							display: block;
 							height: 16px;
 							max-width: 48px;
+							// 8-bit drawings: scaled up without smoothing
+							image-rendering: pixelated;
 						}
 
 						&.left .logo {
@@ -321,7 +323,7 @@
 		}
 	
 		// page 3: airport plan
-		.ground {
+		.overhead-page.ground {
 			.plan,
 			.plan-targets {
 				position: absolute;

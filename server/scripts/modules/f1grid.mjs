@@ -4,13 +4,17 @@
 // (see utils/f1-weekend.mjs); the rest of the time F1 Last Race takes its place.
 // The order is the qualifying classification: grid penalties are not included.
 // Sources: race grid from Jolpica F1 (qualifying); sprint grid from Jolpica F1's alpha API
-// (sprint qualifying), with OpenF1 as a backup. Team icons come from the car number.
+// (sprint qualifying); OpenF1 as a backup for both while Jolpica has not published them.
+// Team icons come from the car number.
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { getPhase, getSessionResult } from './utils/f1-weekend.mjs';
+import {
+	teamsByNumber, teamId, findSession, sessionResult,
+} from './utils/f1-openf1.mjs';
 
 const JOLPICA = 'https://api.jolpi.ca';
 const OPENF1 = 'https://api.openf1.org/v1';
@@ -21,27 +25,6 @@ const LOCAL_TZ = 'Europe/Lisbon';
 const ROW_HEIGHT = 70; // keep in sync with _f1-grid.scss
 const VISIBLE_HEIGHT = 266;
 const HOLD = 150; // steps (3 s) before scrolling and at the end
-
-// the alpha API and OpenF1 give team names, not the constructorId used for the icons
-const TEAM_NAMES = {
-	'red bull': 'red_bull',
-	'red bull racing': 'red_bull',
-	'rb f1 team': 'rb',
-	'racing bulls': 'rb',
-	mercedes: 'mercedes',
-	ferrari: 'ferrari',
-	mclaren: 'mclaren',
-	'aston martin': 'aston_martin',
-	alpine: 'alpine',
-	'alpine f1 team': 'alpine',
-	williams: 'williams',
-	haas: 'haas',
-	'haas f1 team': 'haas',
-	audi: 'audi',
-	'kick sauber': 'audi',
-	cadillac: 'cadillac',
-	'cadillac f1 team': 'cadillac',
-};
 
 const stripAccents = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const shortRaceName = (name) => name.replace('Grand Prix', 'GP');
@@ -61,18 +44,13 @@ const timeText = (seconds, pole, index) => {
 	return index === 0 ? lapText(seconds) : `+${(seconds - pole).toFixed(3)}`;
 };
 
-// car number -> constructorId, from the latest race
-const teamsByNumber = async () => {
-	const results = (await json(`${JOLPICA}/ergast/f1/current/last/results/`).catch(() => null))?.MRData?.RaceTable?.Races?.[0]?.Results ?? [];
-	return Object.fromEntries(results.map((r) => [Number(r.number), r.Constructor?.constructorId]));
-};
 const withTeams = async (rows) => {
 	const teams = await teamsByNumber();
 	return rows.map((r) => ({
 		position: String(r.position),
 		name: r.name,
 		time: r.time ?? null,
-		team: teams[Number(r.number)] ?? TEAM_NAMES[String(r.teamName ?? '').toLowerCase()] ?? '',
+		team: teamId(teams, r.number, r.teamName),
 	}));
 };
 
@@ -101,6 +79,25 @@ const openf1Grid = async (season, sessionName, start) => {
 	return withTeams(grid.sort((a, b) => a.position - b.position).map((g) => ({
 		position: g.position, name: byNumber[g.driver_number]?.last_name ?? `#${g.driver_number}`, number: g.driver_number, teamName: byNumber[g.driver_number]?.team_name, time: g.lap_duration ?? null,
 	})));
+};
+
+// OpenF1 qualifying or sprint qualifying classification, when Jolpica has not published it yet.
+// The time is from the last part each driver reached: top 10 in Q3, the next ones down to the
+// first cut in Q2 (16 of 22 cars, 15 of 20), the rest in Q1
+const openf1Qualifying = async (season, sessionName, start) => {
+	const session = await findSession(season, sessionName, start);
+	if (!session) return null;
+	const results = await sessionResult(session.session_key);
+	if (results.length < 2) return null;
+	const q2Cut = results.length >= 22 ? 16 : 15;
+	return withTeams(results.map((r, i) => {
+		let part = 0;
+		if (i < 10) part = 2;
+		else if (i < q2Cut) part = 1;
+		return {
+			position: i + 1, name: r.driver.last_name ?? `#${r.driver_number}`, number: r.driver_number, teamName: r.driver.team_name, time: (r.duration ?? [])[part] ?? null,
+		};
+	}));
 };
 
 // Jolpica qualifying (Ergast format): has the constructorId already
@@ -141,8 +138,8 @@ class F1Grid extends WeatherDisplay {
 		}
 		const type = phase === 'sprint-grid' ? 'sprint' : 'race';
 		const slots = await getSessionResult(CACHE_KEY, `${season}-${round}-${type}`, () => (type === 'sprint'
-			? tryEach(() => alphaResults(season, round, 'SQ'), () => openf1Grid(season, 'Sprint Qualifying', times.sprintQualifying))
-			: tryEach(() => ergastQualifying(season, round), () => alphaResults(season, round, 'Q'))));
+			? tryEach(() => alphaResults(season, round, 'SQ'), () => openf1Qualifying(season, 'Sprint Qualifying', times.sprintQualifying), () => openf1Grid(season, 'Sprint Qualifying', times.sprintQualifying))
+			: tryEach(() => ergastQualifying(season, round), () => alphaResults(season, round, 'Q'), () => openf1Qualifying(season, 'Qualifying', times.qualifying))));
 		this.grid = {
 			type,
 			round,

@@ -1,13 +1,17 @@
 // result of the last Formula 1 race or sprint: podium (team icon, driver, time or gap) and fastest lap.
 // Race: from about 2h30 after the start until the next weekend's first session.
 // Sprint: from about 1 h after the start until qualifying (see utils/f1-weekend.mjs).
-// Between those, the F1 Grid screen takes its place. Source: Jolpica F1.
+// Between those, the F1 Grid screen takes its place. Source: Jolpica F1; OpenF1 while Jolpica
+// has not published the result yet.
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { getPhase, getSessionResult } from './utils/f1-weekend.mjs';
+import {
+	teamsByNumber, teamId, findSession, sessionResult, laps,
+} from './utils/f1-openf1.mjs';
 
 const RESULT_URL = (season, round, type) => `https://api.jolpi.ca/ergast/f1/${season}/${round}/${type === 'sprint' ? 'sprint' : 'results'}/`;
 const CACHE_KEY = 'f1-last-race-cache-v2';
@@ -41,6 +45,39 @@ const parseRace = (race) => {
 	};
 };
 
+// times as Jolpica writes them: winner "1:32:15.123" (or "38:08.162"), others "+5.123"
+const raceTime = (seconds) => {
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	const s = (seconds % 60).toFixed(3).padStart(6, '0');
+	return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+};
+const lapTime = (seconds) => `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(3).padStart(6, '0')}`;
+
+// OpenF1: classification of the race or sprint, and the fastest lap from the lap times
+const openf1Race = async (season, type, start) => {
+	const session = await findSession(season, type === 'sprint' ? 'Sprint' : 'Race', start);
+	if (!session) return null;
+	const results = await sessionResult(session.session_key);
+	if (results.length < 3 || String(results[0].position) !== '1') return null;
+	const teams = await teamsByNumber();
+	const allLaps = (await laps(session.session_key)).filter((l) => l.lap_duration);
+	const best = allLaps.reduce((a, b) => (!a || b.lap_duration < a.lap_duration ? b : a), null);
+	const name = (number) => results.find((r) => r.driver_number === number)?.driver?.last_name ?? `#${number}`;
+	return {
+		podium: results.slice(0, 3).map((r, i) => {
+			let time = '';
+			if (i === 0) time = r.duration ? raceTime(r.duration) : '';
+			else if (typeof r.gap_to_leader === 'number') time = `+${r.gap_to_leader.toFixed(3)}`;
+			else time = String(r.gap_to_leader ?? '');
+			return {
+				position: String(i + 1), name: r.driver.last_name ?? `#${r.driver_number}`, team: teamId(teams, r.driver_number, r.driver.team_name), time,
+			};
+		}),
+		fastest: best ? { name: name(best.driver_number), time: lapTime(best.lap_duration), lap: best.lap_number } : null,
+	};
+};
+
 class F1LastRace extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		super(navId, elemId, 'F1 Last Race', defaultActive);
@@ -52,7 +89,7 @@ class F1LastRace extends WeatherDisplay {
 
 		// only after a race or a sprint; the rest of the weekend belongs to the grid
 		const {
-			phase, season, round, race: scheduled,
+			phase, season, round, race: scheduled, times,
 		} = await getPhase();
 		if (phase !== 'race-result' && phase !== 'sprint-result') {
 			this.setStatus(STATUS.noData);
@@ -60,8 +97,17 @@ class F1LastRace extends WeatherDisplay {
 		}
 		this.type = phase === 'sprint-result' ? 'sprint' : 'race';
 		this.race = await getSessionResult(CACHE_KEY, `${season}-${round}-${this.type}`, async () => {
-			const race = (await json(RESULT_URL(season, round, this.type)))?.MRData?.RaceTable?.Races?.[0];
-			const parsed = race ? parseRace(race) : null;
+			const race = (await json(RESULT_URL(season, round, this.type)).catch(() => null))?.MRData?.RaceTable?.Races?.[0];
+			let parsed = race ? parseRace(race) : null;
+			if (!parsed) {
+				// not on Jolpica yet: OpenF1, with the round's details from the schedule
+				const result = await openf1Race(season, this.type, this.type === 'sprint' ? times.sprint : times.race).catch(() => null);
+				if (result) {
+					parsed = {
+						...result, round, name: scheduled.raceName, country: scheduled.Circuit?.Location?.country, date: scheduled.date,
+					};
+				}
+			}
 			// the sprint answer carries the race date; the sprint date comes from the schedule
 			if (parsed && this.type === 'sprint' && scheduled.Sprint?.date) parsed.date = scheduled.Sprint.date;
 			return parsed;
