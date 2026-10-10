@@ -14,6 +14,13 @@
 		height: 310px;
 		overflow: hidden;
 
+		// many screens: smaller lines (height set in progress.mjs)
+		&.compact .item {
+			height: var(--line-height);
+			line-height: var(--line-height);
+			font-size: calc(var(--line-height) * 0.9);
+		}
+
 		.item {
 			position: relative;
 
@@ -21,7 +28,7 @@
 				white-space: nowrap;
 
 				&::after {
-					content: '........................................................................';
+					content: '................................................................................................................................................................';
 				}
 			}
 

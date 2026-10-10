@@ -34,8 +34,10 @@ class Progress extends WeatherDisplay {
 
 		// if no displays provided just draw the backgrounds (above)
 		if (!displays) return;
+		// screens that are switched off are left out: with this many screens the list no longer fits
 		const lines = displays.map((display, index) => {
 			if (display.showOnProgress === false) return false;
+			if (display.status === STATUS.disabled) return false;
 			const fill = {
 				name: display.name,
 			};
@@ -59,6 +61,10 @@ class Progress extends WeatherDisplay {
 		const container = this.elem.querySelector('.container');
 		container.innerHTML = '';
 		container.append(...lines);
+		// more than 10 lines: shrink them so all fit in the box (296 px of the 310), down to 15 px a line
+		const lineHeight = lines.length > 10 ? Math.max(15, Math.floor(296 / lines.length)) : null;
+		container.style.setProperty('--line-height', lineHeight ? `${lineHeight}px` : '');
+		container.classList.toggle('compact', !!lineHeight);
 
 		this.finishDraw();
 
