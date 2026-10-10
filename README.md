@@ -88,6 +88,10 @@ Edit the sources, run `npm run build:css` and `npm run build`, and commit the `d
 
 To replace an icon, flag or the logo without building, put the new file with the same name in both `server/images/...` and `docs/images/...` (otherwise the next build brings the old one back). GitHub Pages lets browsers cache images for 10 minutes.
 
+### Version
+
+Sky Pit Wall has its own version number, in `package.json`, starting at 1.0.0 (10 October 2026); it was forked from WeatherStar 4000+ International 12.1.0. The version is shown on the loading screen and is the cache-buster of the script and style links, so each release should raise it: the last number for fixes, the middle one for new screens or features.
+
 ### Credits
 
 - Based on [WeatherStar 4000+ International](https://github.com/mwood77/ws4kp-international) by [@mwood77](https://github.com/mwood77) and [ws4kp](https://github.com/netbymatt/ws4kp) by [@netbymatt](https://github.com/netbymatt) (MIT License).
