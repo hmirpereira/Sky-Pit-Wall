@@ -80,6 +80,7 @@ Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Pers
 - The menu button with no location chosen drew the progress screen under the start screen; it now focuses the search box.
 - METAR to weather code conversion for personal weather stations (test order and codes).
 - Webamp pinned to a fixed version instead of `@next`; image preloads resolve relative to the page.
+- Webamp playlist: *The Weather Channel Presents: The Best of Smooth Jazz* (one full-album file streamed from the [Internet Archive](https://archive.org/details/the-weather-channel-presents-the-best-of-smooth-jazz-full-album)) instead of the Weatherscan tracks. On the TV the Winamp is hidden and the Pi plays its own music.
 
 ### Updating the live site
 
