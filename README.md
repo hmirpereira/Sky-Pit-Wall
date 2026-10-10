@@ -30,6 +30,7 @@ In rotation order, as configured on the TV:
 | Hazards | IPMA warnings for one district (in Portuguese); skipped when there are none | [IPMA](https://api.ipma.pt) |
 | Current Conditions, Hourly Forecast, Hourly Graph, Extended Forecast, Almanac, Air Quality | As upstream | [Open-Meteo](https://open-meteo.com) |
 | Travel Forecast | Frankfurt, Munich, Zurich, Geneva and Vienna | Open-Meteo |
+| Regional Forecast | Portugal: district and island capitals on five maps, with the day's icon, high and low | Open-Meteo; maps from [Natural Earth](https://www.naturalearthdata.com) |
 | Local Radar | As upstream | [RainViewer](https://www.rainviewer.com) |
 | Pollen | Daily pollen levels | Open-Meteo (CAMS) |
 | Airport METAR | METAR and TAF of one airport, decoded into plain English | [metar.vatsim.net](https://metar.vatsim.net); TAF from [aviationweather.gov](https://aviationweather.gov) via the Raspberry Pi |
@@ -41,9 +42,11 @@ In rotation order, as configured on the TV:
 | F1 Drivers | Drivers' championship, scrolling through the whole field | [Jolpica F1](https://github.com/jolpica/jolpica-f1) |
 | F1 Next Race | Track, details and countdown; weekend schedule and race forecast | Jolpica F1, [f1-circuits](https://github.com/bacinger/f1-circuits), Open-Meteo |
 
-Latest Observations, Regional Forecast, Local Forecast, Marine Forecast and Personal Weather Station are left as upstream but switched off on the TV.
+Latest Observations, Local Forecast, Marine Forecast and Personal Weather Station are left as upstream but switched off on the TV.
 
 ### New and reworked screens
+
+- **Regional Forecast** (reworked for Portugal): the original used the US National Weather Service and a US map, so it never worked outside the USA. It now shows the 18 district capitals and the island capitals (Ponta Delgada, Angra, Horta, Funchal) on five maps, North, Centre, Lisbon, South and Islands, 6 seconds each. Each label sits on its city (weather icon, high, low), without dots or lines. Today's forecast until 18:00, then tomorrow's. One Open-Meteo request for the 22 cities. The maps and label positions are made by a generator script (not in this repository) from Natural Earth 1:10m (public domain) into `images/regional-pt-*.png` and `utils/regional-pt.mjs`.
 
 - **Hazards**: warnings from IPMA (the Portuguese weather service) for one district, kept in Portuguese on purpose, without accents (the Star4000 fonts have none). Only yellow, orange and red warnings; the screen is skipped when there are none. In widescreen the warning colour fills the whole width.
 - **Airport METAR**: the airport's METAR decoded into plain English (wind, visibility, weather, clouds, temperature, humidity, pressure, trend). Busy reports are split into pages; the raw report is shown when there is room. When the page runs on the Raspberry Pi, the airport's TAF follows on its own pages: issue time, then each change group (Becoming, Temporary, Prob 30%, From) with its period in Portuguese time and its conditions (the raw TAF is not shown). aviationweather.gov does not accept browser requests, so the TAF is fetched by the `skypitwall-voos` service on the Pi and read from `http://127.0.0.1:8095/taf.json`; anywhere else the TAF pages are simply left out.

@@ -1,209 +1,94 @@
-// regional forecast and observations
-// type 0 = observations, 1 = first forecast, 2 = second forecast
-
+// Regional Forecast for Portugal: district capitals and island capitals on five maps
+// (north, centre, Lisbon area, south, islands); each label sits on its city, without dots or lines, each with the day's weather icon, high and low.
+// Before 18:00 it shows today, after that tomorrow (like the Travel Forecast).
+// Data: one Open-Meteo request for all 22 cities. Maps and label positions are made by
+// ferramentas/mkregional.py from Natural Earth (public domain) and stored in utils/regional-pt.mjs.
+// (The original screen used the US National Weather Service and a US map, so it never worked here.)
 import STATUS from './status.mjs';
-import { distance as calcDistance } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
-import { celsiusToFahrenheit } from './utils/units.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
-import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import * as utils from './regionalforecast-utils.mjs';
-import { getPoint } from './utils/weather.mjs';
+import { getConditionText } from './utils/weather.mjs';
+import ConversionHelpers from './utils/conversionHelpers.mjs';
+import REGIONAL_PAGES from './utils/regional-pt.mjs';
+
+const SWITCH_TO_TOMORROW_HOUR = 18;
+const PAGE_TITLES = {
+	north: 'North', centre: 'Centre', lisbon: 'Lisbon', south: 'South', islands: 'Islands',
+};
 
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Regional Forecast', false);
 		this.showOnProgress = false;
-
-		// timings
-		this.timing.totalScreens = 3;
+		this.timing.baseDelay = 6000;
+		this.timing.totalScreens = REGIONAL_PAGES.length;
 	}
 
 	async getData(_weatherParameters) {
 		if (!super.getData(_weatherParameters)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
-		// pre-load the base map
-		let baseMap = 'images/Basemap2.png';
-		if (weatherParameters.state === 'HI') {
-			baseMap = 'images/HawaiiRadarMap4.png';
-		} else if (weatherParameters.state === 'AK') {
-			baseMap = 'images/AlaskaRadarMap6.png';
-		}
-		this.elem.querySelector('.map img').src = baseMap;
-
-		// map offset
-		const offsetXY = {
-			x: 240,
-			y: 117,
-		};
-		// get user's location in x/y
-		const sourceXY = utils.getXYFromLatitudeLongitude(weatherParameters.latitude, weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
-
-		// get latitude and longitude limits
-		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, weatherParameters.state);
-
-		// get a target distance
-		let targetDistance = 2.5;
-		if (weatherParameters.state === 'HI') targetDistance = 1;
-
-		// make station info into an array
-		const stationInfoArray = Object.values(StationInfo).map((value) => ({ ...value, targetDistance }));
-		// combine regional cities with station info for additional stations
-		// stations are intentionally after cities to allow cities priority when drawing the map
-		const combinedCities = [...RegionalCities, ...stationInfoArray];
-
-		// Determine which cities are within the max/min latitude/longitude.
-		const regionalCities = [];
-		combinedCities.forEach((city) => {
-			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat
-						&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
-				// default to 1 for cities loaded from RegionalCities, use value calculate above for remaining stations
-				const targetDist = city.targetDistance || 1;
-				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
-				const okToAddCity = regionalCities.reduce((acc, testCity) => {
-					const distance = calcDistance(city.lon, city.lat, testCity.lon, testCity.lat);
-					return acc && distance >= targetDist;
-				}, true);
-				if (okToAddCity) regionalCities.push(city);
-			}
-		});
-
-		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
-		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
-			try {
-				const point = city?.point ?? (await getAndFormatPoint(city.lat, city.lon));
-				if (!point) throw new Error('No pre-loaded point');
-
-				// start off the observation task
-				const observationPromise = utils.getRegionalObservation(point, city);
-
-				const forecast = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
-
-				// get XY on map for city
-				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
-
-				// wait for the regional observation if it's not done yet
-				const observation = await observationPromise;
-
-				if (!observation) return false;
-
-				// format the observation the same as the forecast
-				const regionalObservation = {
-					daytime: !!/\/day\//.test(observation.icon),
-					temperature: celsiusToFahrenheit(observation.temperature.value),
-					name: utils.formatCity(city.city),
-					icon: observation.icon,
-					x: cityXY.x,
-					y: cityXY.y,
+		const cities = REGIONAL_PAGES.flatMap((page) => page.cities);
+		this.today = DateTime.local().hour < SWITCH_TO_TOMORROW_HOUR;
+		const day = this.today ? 0 : 1;
+		try {
+			const lats = cities.map((c) => c.lat).join(',');
+			const lons = cities.map((c) => c.lon).join(',');
+			const response = await json(`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=2`);
+			const results = Array.isArray(response) ? response : [response];
+			this.forecast = {};
+			cities.forEach((city, index) => {
+				const daily = results[index]?.daily;
+				if (!daily) return;
+				this.forecast[city.key] = {
+					icon: getWeatherRegionalIconFromIconLink(getConditionText(Number(daily.weather_code[day])), 1),
+					high: Math.round(ConversionHelpers.convertTemperatureUnits(daily.temperature_2m_max[day])),
+					low: Math.round(ConversionHelpers.convertTemperatureUnits(daily.temperature_2m_min[day])),
 				};
-
-				// preload the icon
-				preloadImg(getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime));
-
-				// return a pared-down forecast
-				// 0th object is the current conditions
-				// first object is the next period i.e. if it's daytime then it's the "tonight" forecast
-				// second object is the following period
-				// always skip the first forecast index because it's what's going on right now
-				return [
-					regionalObservation,
-					utils.buildForecast(forecast.properties.periods[1], city, cityXY),
-					utils.buildForecast(forecast.properties.periods[2], city, cityXY),
-				];
-			} catch (error) {
-				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
-				console.log(error);
-				return false;
-			}
-		}));
-
-		// filter out any false (unavailable data)
-		const regionalData = regionalDataAll.filter((data) => data);
-
-		// test for data present
-		if (regionalData.length === 0) {
+			});
+			this.dayName = this.today ? 'Today' : DateTime.local().plus({ days: 1 }).toFormat('cccc');
+		} catch (error) {
+			console.error('RegionalForecast: no data', error);
+			this.forecast = {};
+		}
+		if (Object.keys(this.forecast).length === 0) {
 			this.setStatus(STATUS.noData);
 			return;
 		}
-
-		// return the weather data and offsets
-		this.data = {
-			regionalData,
-			offsetXY,
-			sourceXY,
-		};
-
 		this.setStatus(STATUS.loaded);
 	}
 
-	drawCanvas() {
+	async drawCanvas() {
 		super.drawCanvas();
-		// break up data into useful values
-		const { regionalData: data, sourceXY, offsetXY } = this.data;
+		const page = REGIONAL_PAGES[Math.min(Math.max(this.screenIndex, 0), REGIONAL_PAGES.length - 1)];
 
-		// draw the header graphics
+		this.elem.querySelector('.header .title.dual .top').innerHTML = `Portugal ${PAGE_TITLES[page.id]}`;
+		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `Forecast ${this.dayName}`;
+		this.elem.querySelector('.map img').src = page.map;
 
-		// draw the appropriate title
-		const titleTop = this.elem.querySelector('.title.dual .top');
-		const titleBottom = this.elem.querySelector('.title.dual .bottom');
-		if (this.screenIndex === 0) {
-			titleTop.innerHTML = 'Regional';
-			titleBottom.innerHTML = 'Observations';
-		} else {
-			const forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
+		const blocks = page.cities.map((city) => {
+			const data = this.forecast[city.key];
+			if (!data) return false;
+			const block = this.fillTemplate('location', {
+				city: city.name,
+				high: data.high,
+				low: data.low,
+				icon: { type: 'img', src: data.icon },
+			});
+			block.style.left = `${city.x}px`;
+			block.style.top = `${city.y}px`;
+			block.style.width = `${city.w}px`;
+			return block;
+		}).filter((d) => d);
 
-			// get the name of the day
-			const dayName = forecastDate.toLocaleString({ weekday: 'long' });
-			titleTop.innerHTML = 'Forecast for';
-			// draw the title
-			titleBottom.innerHTML = data[0][this.screenIndex].daytime
-				? dayName
-				: `${dayName} Night`;
-		}
-
-		// draw the map
-		const scale = 640 / (offsetXY.x * 2);
-		const map = this.elem.querySelector('.map');
-		map.style.transform = `scale(${scale}) translate(-${sourceXY.x}px, -${sourceXY.y}px)`;
-
-		const cities = data.map((city) => {
-			const fill = {};
-			const period = city[this.screenIndex];
-
-			fill.icon = { type: 'img', src: getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
-			fill.city = period.name;
-			const { temperature } = period;
-			fill.temp = temperature;
-
-			const { x, y } = period;
-
-			const elem = this.fillTemplate('location', fill);
-			elem.style.left = `${x}px`;
-			elem.style.top = `${y}px`;
-
-			return elem;
-		});
-
-		const locationContainer = this.elem.querySelector('.location-container');
-		locationContainer.innerHTML = '';
-		locationContainer.append(...cities);
+		const container = this.elem.querySelector('.location-container');
+		container.innerHTML = '';
+		container.append(...blocks);
 
 		this.finishDraw();
 	}
 }
 
-const getAndFormatPoint = async (lat, lon) => {
-	const point = await getPoint(lat, lon);
-	return {
-		x: point.properties.gridX,
-		y: point.properties.gridY,
-		wfo: point.properties.gridId,
-	};
-};
-
-// register display
 registerDisplay(new RegionalForecast(6, 'regional-forecast'));
