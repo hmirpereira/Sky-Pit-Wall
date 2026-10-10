@@ -1,0 +1,51 @@
+<%- include('header.ejs', {titleDual:{ top: 'Overhead' , bottom: 'Closest Now' }, hasTime: true, noaaLogo: false}) %>
+	<div class="main has-scroll overhead">
+		<div class="overhead-page closest">
+			<div class="where"></div>
+			<div class="ident">
+				<span class="callsign"></span><span class="airline"></span>
+				<img class="tail" alt="" />
+			</div>
+			<div class="route">
+				<div class="from"><div class="code"></div><div class="city"></div></div>
+				<div class="arrow"></div>
+				<div class="to"><div class="code"></div><div class="city"></div></div>
+				<div class="unknown-text">Route unknown</div>
+			</div>
+			<div class="facts">
+				<div class="alt"><div class="label">ALTITUDE</div><div class="value"></div></div>
+				<div class="speed"><div class="label">SPEED</div><div class="value"></div></div>
+				<div class="type"><div class="label">TYPE</div><div class="value"></div></div>
+				<div class="reg"><div class="label">REG</div><div class="value"></div></div>
+			</div>
+		</div>
+		<div class="overhead-page radar">
+			<div class="scope">
+				<div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+				<div class="home"></div>
+				<div class="ring-label l1">10</div><div class="ring-label l2">25</div>
+				<div class="targets"></div>
+			</div>
+			<div class="list">
+				<div class="column-headers">
+					<div class="callsign">FLIGHT</div>
+					<div class="alt">ALT M</div>
+					<div class="dist">KM</div>
+				</div>
+				<div class="overhead-lines">
+					<div class="overhead-row template">
+						<div class="callsign"></div>
+						<div class="alt"></div>
+						<div class="dist"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="overhead-page ground">
+			<div class="plan"></div>
+			<div class="plan-targets"></div>
+			<div class="north"><div class="arrow"></div><div class="n">N</div></div>
+			<div class="plan-credit">Map data (c) OpenStreetMap contributors</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

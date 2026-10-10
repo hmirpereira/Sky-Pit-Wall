@@ -116,4 +116,4 @@ class F1LastRace extends WeatherDisplay {
 }
 
 // register display
-registerDisplay(new F1LastRace(19, 'f1-last-race', true));
+registerDisplay(new F1LastRace(20, 'f1-last-race', true));

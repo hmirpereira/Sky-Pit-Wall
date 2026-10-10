@@ -20,6 +20,7 @@ $av-yellow: #ffad00;
 #metar-html,
 #departures-html,
 #cancellations-html,
+#overhead-html,
 #work-schedule-html {
 	background-image: url(../images/BackGround1_1_aviation.png);
 
@@ -31,6 +32,7 @@ $av-yellow: #ffad00;
 .wide.metar #container,
 .wide.departures #container,
 .wide.cancellations #container,
+.wide.overhead #container,
 .wide.work-schedule #container {
 	background: url(../images/BackGround1_1_wide_aviation.png);
 }

@@ -49,6 +49,7 @@ const mjsSources = [
 	'server/scripts/modules/metar.mjs',
 	'server/scripts/modules/departures.mjs',
 	'server/scripts/modules/cancellations.mjs',
+	'server/scripts/modules/overhead.mjs',
 	'server/scripts/modules/workschedule.mjs',
 	'server/scripts/modules/f1lastrace.mjs',
 	'server/scripts/modules/f1grid.mjs',

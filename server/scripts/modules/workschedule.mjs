@@ -194,4 +194,4 @@ class WorkSchedule extends WeatherDisplay {
 }
 
 // register display (off by default: it only works on the Pi running skypitwall-voos and skypitwall-horario)
-registerDisplay(new WorkSchedule(18, 'work-schedule', false));
+registerDisplay(new WorkSchedule(19, 'work-schedule', false));

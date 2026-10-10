@@ -1,0 +1,480 @@
+@use 'shared/_utils'as u;
+@use 'aviation-theme'as av;
+
+// 310px high
+.weather-display .main.overhead {
+	&.main {
+		overflow: hidden;
+		@include av.av-rows-background;
+		color: white;
+		font-family: 'Star4000';
+		@include u.text-shadow();
+
+		.overhead-page {
+			position: relative;
+			height: 310px;
+		}
+
+		// page 1: the closest aircraft
+		.closest {
+			.where {
+				height: 30px;
+				line-height: 30px;
+				padding-left: 24px;
+				font-size: 16pt;
+				color: av.$av-light-blue;
+				background: av.$av-column-header;
+			}
+
+			.ident {
+				position: relative;
+				height: 56px;
+				padding: 8px 24px 0;
+				white-space: nowrap;
+
+				.callsign {
+					font-family: 'Star4000 Large';
+					font-size: 30pt;
+					color: av.$av-yellow;
+				}
+
+				.airline {
+					margin-left: 20px;
+					font-size: 20pt;
+				}
+
+				.tail {
+					position: absolute;
+					right: 24px;
+					top: 6px;
+					width: 48px;
+					height: 48px;
+				}
+			}
+
+			.route .unknown-text {
+				display: none;
+			}
+
+			.route.unknown {
+				>div {
+					display: none;
+				}
+
+				.unknown-text {
+					display: block;
+					margin-top: 36px;
+					font-family: 'Star4000 Large';
+					font-size: 24pt;
+					color: av.$av-light-blue;
+				}
+			}
+
+			.route {
+				display: flex;
+				align-items: flex-start;
+				justify-content: center;
+				height: 120px;
+				padding-top: 8px;
+
+				.from,
+				.to {
+					width: 220px;
+					text-align: center;
+
+					.code {
+						font-family: 'Star4000 Large';
+						font-size: 44pt;
+						line-height: 64px;
+					}
+
+					.city {
+						font-size: 16pt;
+						color: av.$av-light-blue;
+						white-space: nowrap;
+					}
+				}
+
+				// dashed track with an arrow head
+				.arrow {
+					position: relative;
+					width: 120px;
+					height: 64px;
+
+					&::before {
+						content: '';
+						position: absolute;
+						left: 0;
+						right: 14px;
+						top: 31px;
+						border-top: 3px dashed av.$av-yellow;
+					}
+
+					&::after {
+						content: '';
+						position: absolute;
+						right: 0;
+						top: 23px;
+						border-left: 18px solid av.$av-yellow;
+						border-top: 10px solid transparent;
+						border-bottom: 10px solid transparent;
+					}
+				}
+			}
+
+			.facts {
+				display: flex;
+				height: 104px;
+				background: rgba(1, 6, 24, 0.55);
+
+				>div {
+					flex: 1;
+					text-align: center;
+					padding-top: 18px;
+				}
+
+				.label {
+					font-size: 14pt;
+					color: av.$av-light-blue;
+				}
+
+				.value {
+					font-family: 'Star4000 Large';
+					font-size: 20pt;
+					margin-top: 6px;
+					white-space: nowrap;
+				}
+
+				.trend {
+					display: inline-block;
+					margin-left: 8px;
+					vertical-align: 4px;
+					border-left: 8px solid transparent;
+					border-right: 8px solid transparent;
+
+					&.up {
+						border-bottom: 14px solid av.$av-yellow;
+					}
+
+					&.down {
+						border-top: 14px solid av.$av-yellow;
+					}
+				}
+			}
+		}
+
+		// page 2: radar and list
+		.radar {
+			.scope {
+				position: absolute;
+				left: 22px;
+				top: 15px;
+				width: 280px;
+				height: 280px;
+
+				.ring {
+					position: absolute;
+					border: 2px solid rgba(169, 196, 239, 0.45);
+					border-radius: 50%;
+				}
+
+				// 10, 25 and 50 km (radius 140 px = 50 km)
+				.r1 { left: 112px; top: 112px; width: 56px; height: 56px; }
+				.r2 { left: 70px; top: 70px; width: 140px; height: 140px; }
+				.r3 { left: 0; top: 0; width: 280px; height: 280px; border-color: rgba(169, 196, 239, 0.8); }
+
+				.ring-label {
+					position: absolute;
+					font-size: 11pt;
+					color: av.$av-light-blue;
+				}
+
+				.l1 { left: 171px; top: 128px; }
+				.l2 { left: 212px; top: 128px; }
+
+				.home {
+					position: absolute;
+					left: 136px;
+					top: 136px;
+					width: 8px;
+					height: 8px;
+					border-radius: 50%;
+					background: white;
+				}
+
+				.targets>div {
+					position: absolute;
+				}
+
+				.airport {
+					transform: translate(8px, -50%);
+
+					&.west {
+						transform: translate(calc(-100% - 8px), -50%);
+					}
+
+					font-size: 11pt;
+					color: av.$av-light-blue;
+					padding: 0 3px;
+					border: 1px solid av.$av-light-blue;
+				}
+
+				.target {
+					.plane {
+						position: absolute;
+						left: -5px;
+						top: -10px;
+						width: 0;
+						height: 0;
+						border-left: 5px solid transparent;
+						border-right: 5px solid transparent;
+						border-bottom: 20px solid white;
+					}
+
+					.label {
+						position: absolute;
+						left: 10px;
+						top: -6px;
+						width: 62px;
+
+						&.left {
+							left: -72px;
+							text-align: right;
+						}
+
+						font-size: 10pt;
+						line-height: 14px;
+						white-space: nowrap;
+
+						.logo {
+							display: block;
+							height: 16px;
+							max-width: 48px;
+						}
+
+						&.left .logo {
+							margin-left: auto;
+						}
+
+						.route {
+							color: av.$av-light-blue;
+						}
+					}
+
+					&.closest .plane {
+						border-bottom-color: av.$av-yellow;
+					}
+
+					&.closest .label {
+						color: av.$av-yellow;
+					}
+
+					.dot {
+						position: absolute;
+						left: -3px;
+						top: -3px;
+						width: 6px;
+						height: 6px;
+						background: av.$av-raw;
+					}
+				}
+			}
+
+			.list {
+				position: absolute;
+				left: 330px;
+				top: 0;
+				width: 290px;
+
+				.column-headers {
+					position: relative;
+					height: 30px;
+					background: av.$av-column-header;
+
+					div {
+						position: absolute;
+						top: -2px;
+						font-family: 'Star4000 Small';
+						font-size: 22pt;
+						color: av.$av-light-blue;
+					}
+				}
+
+				.overhead-row {
+					position: relative;
+					height: 40px;
+					font-family: 'Star4000 Large';
+					font-size: 20pt;
+
+					div {
+						position: absolute;
+						top: 6px;
+					}
+				}
+
+				.callsign { left: 10px; }
+				.alt { left: 140px; }
+				.dist { right: 10px; text-align: right; }
+
+				.overhead-row .callsign { color: av.$av-yellow; }
+			}
+		}
+	
+		// page 3: airport plan
+		.ground {
+			.plan,
+			.plan-targets {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 640px;
+				height: 310px;
+			}
+
+			svg {
+				width: 640px;
+				height: 310px;
+
+				.apron {
+					fill: #24387a;
+					stroke: #3b55a5;
+				}
+
+				.building {
+					fill: #5d6f9e;
+					stroke: #8fa6cc;
+				}
+
+				.taxiway {
+					fill: none;
+					stroke: #e2b13c;
+					stroke-width: 2;
+					opacity: 0.55;
+				}
+
+				.runway {
+					fill: none;
+					stroke: #d8dde6;
+					stroke-width: 9;
+				}
+
+				.stand {
+					fill: #a9c4ef;
+				}
+			}
+
+			.target {
+				position: absolute;
+
+				.plane {
+					position: absolute;
+					left: -6px;
+					top: -9px;
+					border-left: 6px solid transparent;
+					border-right: 6px solid transparent;
+					border-bottom: 18px solid white;
+				}
+
+				&.moving .plane {
+					border-bottom-color: av.$av-yellow;
+				}
+
+				// transponder off: last position, in grey
+				&.parked {
+					.plane {
+						border-bottom-color: #8a93a6;
+					}
+
+					.label,
+					.label .where {
+						color: #8a93a6;
+					}
+				}
+
+				.label {
+					position: absolute;
+					top: -8px;
+					left: 9px;
+					width: 70px;
+					font-size: 11pt;
+					line-height: 16px;
+					white-space: nowrap;
+
+					.where {
+						font-size: 10pt;
+						line-height: 14px;
+						color: av.$av-yellow;
+					}
+
+					&.left {
+						left: -79px;
+						text-align: right;
+					}
+				}
+			}
+
+			// taxiway letters like the signs (yellow on black), stand numbers small
+			.twy {
+				position: absolute;
+				height: 14px;
+				font-family: 'Star4000 Small';
+				font-size: 9pt;
+				line-height: 14px;
+				text-align: center;
+				color: av.$av-yellow;
+				background: rgba(0, 0, 0, 0.75);
+				text-shadow: none;
+			}
+
+			.stand-ref {
+				position: absolute;
+				font-family: 'Star4000 Small';
+				font-size: 7pt;
+				line-height: 13px;
+				padding-left: 2px;
+				// the usual 3 px shadow smudges text this small
+				@include u.text-shadow(1px, 0.5px);
+				color: #a9c4ef;
+				white-space: nowrap;
+			}
+
+			// north mark, turned with the plan
+			.north {
+				position: absolute;
+				left: 14px;
+				top: 10px;
+				width: 30px;
+				height: 50px;
+
+				.arrow {
+					position: absolute;
+					left: 9px;
+					top: 0;
+					border-left: 6px solid transparent;
+					border-right: 6px solid transparent;
+					border-bottom: 16px solid av.$av-light-blue;
+					// turns about the middle of a 30 px box, the letter stays upright
+					transform-origin: 6px 15px;
+				}
+
+				.n {
+					position: absolute;
+					left: 0;
+					top: 30px;
+					width: 30px;
+					text-align: center;
+					font-size: 12pt;
+					color: av.$av-light-blue;
+				}
+			}
+
+			.plan-credit {
+				position: absolute;
+				right: 8px;
+				bottom: 4px;
+				font-size: 9pt;
+				color: av.$av-light-blue;
+			}
+		}
+}
+}

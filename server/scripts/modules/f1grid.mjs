@@ -218,4 +218,4 @@ class F1Grid extends WeatherDisplay {
 }
 
 // register display
-registerDisplay(new F1Grid(20, 'f1-grid', true));
+registerDisplay(new F1Grid(21, 'f1-grid', true));
