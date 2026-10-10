@@ -45,8 +45,9 @@
 		}
 
 		.travel-lines {
-			// 289px visible: 10 + 5 x 55 fits five cities without scrolling
-			min-height: 289px;
+			// 289px visible (min-height + 10px padding): five rows of 55px fit without scrolling;
+			// a taller list would make the screen scroll (travelforecast.mjs scrolls by height - 289)
+			min-height: 279px;
 			padding-top: 10px;
 
 			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
