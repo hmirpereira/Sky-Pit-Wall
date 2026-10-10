@@ -4,8 +4,6 @@ import STATUS from './status.mjs';
 import { loadImg } from './utils/image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import { getAirQualityPoint } from './utils/weather.mjs';
-import ExperimentalFeatures from './utils/experimental.mjs';
 
 class AirQualityForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -48,40 +46,6 @@ class AirQualityForecast extends WeatherDisplay {
 				apiFailureContainer.remove();
 			}
 			this.aqiData = await parseAirQualityData(_weatherParameters, _aqiData, this.data);
-		}
-
-		const nearbyCities = JSON.parse(localStorage.getItem('nearbyCitiesFromLocality'));
-
-		if (nearbyCities && nearbyCities.length > 0 && ExperimentalFeatures.getExperimentalFlag()) {
-			const citiesAqiData = await Promise.all(
-				nearbyCities.map(async (city) => {
-					const aqiData = await getAirQualityPoint(city.lat, city.lon);
-					return { ...city, aqiData };
-				}),
-			);
-
-			const formattedNearByData = citiesAqiData
-				.map((uniqueCity) => {
-					// some regions, like Tokyo, have multiple cities/areas with the same name as the city.
-					// so we filter those out to avoid duplicates showing on the view
-					if (uniqueCity.city.toLowerCase() !== this.data.city.toLowerCase()) {
-						const coreData = {
-							country: this.data.country,
-							state: this.data.state,
-							city: uniqueCity.city,
-						};
-						return parseAirQualityData(_weatherParameters, uniqueCity.aqiData, coreData);
-					}
-					return null;
-				})
-				.filter((city) => city !== null);
-
-			// clear existing nearby cities, as duplicates may exist depending on user behavior;
-			// ex: changing location, search on same location again, force-refreshing, etc
-			this.nearbyCities.length = 0;
-
-			// update with only 2 cities due to view limitations
-			this.nearbyCities.push(...formattedNearByData.slice(0, 2));
 		}
 
 		this.calcNavTiming();

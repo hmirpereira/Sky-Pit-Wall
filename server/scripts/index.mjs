@@ -496,6 +496,6 @@ const fullScreenResizeCheck = () => {
 	fullScreenResizeCheck.wasFull = !!document.fullscreenElement;
 };
 
-// Required for Experimental features
+// default export kept for compatibility (nothing uses it after the experimental features were removed)
 export default btnNavigateRefreshClick;
 export { loadData };

@@ -1,5 +1,4 @@
 import Setting from './utils/setting.mjs';
-import btnNavigateRefreshClick from '../index.mjs';
 import { IPMA_AREAS } from './utils/ipma-areas.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,7 +19,6 @@ const settings = {
 	pressureUnits: { value: 1 },
 	hoursFormat: { value: 2 },
 	speed: { value: 1.0 },
-	experimentalFeatures: { value: false },
 	hideWebamp: { value: false },
 	kiosk: { value: false },
 	scanLines: { value: false },
@@ -81,14 +79,6 @@ const init = () => {
 		[1.25, 'Slow'],
 		[1.5, 'Very Slow'],
 	]);
-	settings.experimentalFeatures = new Setting(
-		'experimentalFeatures',
-		'Experimental Features <a href="https://github.com/mwood77/ws4kp-international?tab=readme-ov-file#updates-in-1100" target="_blank" rel="noopener noreferrer">(info)</a>',
-		'checkbox',
-		false,
-		experimentalFeaturesChange,
-		true,
-	);
 	settings.hideWebamp = new Setting('hideWebamp', 'Hide Webamp (Winamp)', 'checkbox', false, hideWebampChange, true);
 	settings.scanLines = new Setting('scanLines', 'Enable Scan Lines', 'checkbox', false, scanLinesChange, true);
 
@@ -144,14 +134,6 @@ const hoursChangeFormat = (value) => {
 	if (value) {
 		document.documentElement.setAttribute('hours-format', value);
 	}
-};
-
-const experimentalFeaturesChange = (value) => {
-	document.documentElement.setAttribute('experimental-features', value);
-
-	// @todo - this is a bit gnarly
-	if (!value) localStorage.removeItem('nearbyCitiesFromLocality');
-	btnNavigateRefreshClick();
 };
 
 const hideWebampChange = async (value) => {

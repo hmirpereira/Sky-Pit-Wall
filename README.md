@@ -82,6 +82,7 @@ Latest Observations, Local Forecast, Marine Forecast and Personal Weather Statio
 - The GPS (current location) button still expected a reply from the US weather service (NOAA) and stalled; it now turns the coordinates into a place name (ArcGIS reverse geocoding) and asks to type a city when the browser gives no position.
 - The menu button with no location chosen drew the progress screen under the start screen; it now focuses the search box.
 - METAR to weather code conversion for personal weather stations (test order and codes).
+- Experimental Features removed (the setting, the nearby-cities lookup for Air Quality and Local Radar, and its third-party proxy `ws4kp-proxy.easypete.com`): slow, unreliable and of little use in Portugal, and the site no longer depends on that server.
 - Webamp pinned to a fixed version instead of `@next`; image preloads resolve relative to the page.
 - Webamp playlist: *The Weather Channel Presents: The Best of Smooth Jazz* (one full-album file streamed from the [Internet Archive](https://archive.org/details/the-weather-channel-presents-the-best-of-smooth-jazz-full-album)) instead of the Weatherscan tracks. On the TV the Winamp is hidden and the Pi plays its own music.
 
