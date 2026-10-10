@@ -93,6 +93,13 @@ const whereOnGround = (airport, ac) => {
 	return best ? `TWY ${best[0]}` : '';
 };
 
+// list of the group's parked aircraft, in the empty corner under the runway (bottom left)
+const LIST_BOX = {
+	x: 10, y: 166, w: 262, h: 128,
+};
+const LIST_ROWS = 6;
+const clock = (iso) => (iso ? new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '');
+
 const PLAN_W = 640;
 const PLAN_H = 310;
 // the plan is turned so the longest runway lies across the page, which fills the wide screen
@@ -218,9 +225,21 @@ class Overhead extends WeatherDisplay {
 		].join('');
 		page.querySelector('.plan').innerHTML = `<svg viewBox="0 0 ${PLAN_W} ${PLAN_H}">${svg}</svg>`;
 
-		// nothing written may overlap: aircraft first, then taxiway letters, then stand numbers
-		// (stands are close together, so only the ones with room get their number). Boxes are [x, y, w, h].
+		// nothing written may overlap: the list of the group's parked aircraft, aircraft labels, then
+		// taxiway letters, then stand numbers (stands are close together, so only the ones with room
+		// get their number). Boxes are [x, y, w, h].
 		const taken = [];
+		const list = this.groupList();
+		const listBox = page.querySelector('.group-list');
+		listBox.style.display = list.length ? '' : 'none';
+		if (list.length) {
+			taken.push([LIST_BOX.x, LIST_BOX.y, LIST_BOX.w, LIST_BOX.h]);
+			const rows = list.slice(0, LIST_ROWS).map((ac) => `<div class="row${ac.parked ? ' parked' : ''}">`
+				+ `<div class="flight">${flightText(ac)}</div><div class="stand">${ac.parked ? ac.stand ?? '' : ac.groupStand}</div>`
+				+ `<div class="since">${clock(ac.since)}</div></div>`);
+			if (list.length > LIST_ROWS) rows[LIST_ROWS - 1] = `<div class="row more">+${list.length - LIST_ROWS + 1} more</div>`;
+			listBox.querySelector('.rows').innerHTML = rows.join('');
+		}
 		const free = (x, y, w, h) => x >= 0 && x + w <= PLAN_W && y >= 0 && y + h <= PLAN_H
 			&& taken.every(([tx, ty, tw, th]) => x >= tx + tw || tx >= x + w || y >= ty + th || ty >= y + h);
 		const take = (box) => {
@@ -231,13 +250,17 @@ class Overhead extends WeatherDisplay {
 
 		// aircraft: arrow in the direction it points; flight number, and under it the stand or taxiway it is on
 		const LABEL_W = 70;
+		// every arrow is kept clear first, so no label covers another aircraft
+		this.onAirport.forEach((ac) => {
+			const p = project(ac.lat, ac.lon);
+			taken.push([p.x - 8, p.y - 10, 16, 20]);
+		});
 		const targets = this.onAirport.map((ac) => {
 			const p = project(ac.lat, ac.lon);
 			let where = '';
 			if (ac.parked) where = ac.stand ?? '';
 			else if (ac.ground) where = whereOnGround(this.airport, ac);
 			const h = where ? 30 : 16;
-			taken.push([p.x - 8, p.y - 10, 16, 20]);
 			const spot = [[9, -8], [-9 - LABEL_W, -8], [9, -h], [-9 - LABEL_W, -h], [9, 2], [-9 - LABEL_W, 2]]
 				.map(([dx, dy]) => [p.x + dx, p.y + dy]).find(([x, y]) => free(x, y, LABEL_W, h));
 			if (spot) taken.push([...spot, LABEL_W, h]);
@@ -268,6 +291,12 @@ class Overhead extends WeatherDisplay {
 		});
 		page.querySelector('.plan-targets').innerHTML = marks.join('') + targets.join('');
 		page.querySelector('.north .arrow').style.transform = `rotate(${turn}deg)`;
+	}
+
+	// the group's aircraft on a stand: transponder on (white) and off (grey), by stand
+	groupList() {
+		return [...this.allAircraft.filter((ac) => ac.groupStand), ...this.parked.filter((ac) => ac.stand)]
+			.sort((a, b) => String(a.groupStand ?? a.stand).localeCompare(String(b.groupStand ?? b.stand), 'en', { numeric: true }));
 	}
 
 	drawClosest() {

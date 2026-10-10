@@ -438,6 +438,58 @@
 				white-space: nowrap;
 			}
 
+			// the group's aircraft on a stand, bottom left (keep in sync with LIST_BOX in overhead.mjs)
+			.group-list {
+				position: absolute;
+				left: 10px;
+				top: 166px;
+				width: 262px;
+				height: 128px;
+				background: rgba(0, 0, 0, 0.35);
+
+				.head {
+					position: relative;
+					height: 20px;
+					background: av.$av-column-header;
+					font-family: 'Star4000 Small';
+					font-size: 14pt;
+					color: av.$av-light-blue;
+
+					div {
+						position: absolute;
+						top: -1px;
+					}
+				}
+
+				.row {
+					position: relative;
+					height: 18px;
+					font-size: 12pt;
+
+					div {
+						position: absolute;
+						top: 1px;
+					}
+
+					.flight {
+						color: av.$av-yellow;
+					}
+
+					&.parked div {
+						color: #8a93a6;
+					}
+
+					&.more {
+						padding-left: 8px;
+						color: av.$av-light-blue;
+					}
+				}
+
+				.flight { left: 8px; }
+				.stand { left: 130px; }
+				.since { left: 196px; }
+			}
+
 			// north mark, turned with the plan
 			.north {
 				position: absolute;
